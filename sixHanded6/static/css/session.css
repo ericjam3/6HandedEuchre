@@ -1,0 +1,335 @@
+body {
+    background-color: rgb(122, 137, 158);
+}
+
+#signinScreen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+#waiting {
+    display: none;
+    font-size: xx-large;
+}
+
+#title {
+    font-size: 50px;
+    margin: 40px;
+}
+
+.titleImage {
+    height: 60px;
+}
+
+#roomNumber {
+    font-size: 28px;
+}
+
+#gametable {
+    font-weight: bold;
+    display: none;
+}
+
+.player {
+    position: fixed;
+    font-size: x-large;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+#player0 {
+    top: 88%;
+    left: 50%;
+}
+
+#player0 img {
+    max-height: 50px;
+}
+
+#player1 {
+    top: 60%;
+    left: 18%;
+}
+
+#player2 {
+    top: 30%;
+    left: 18%;
+}
+
+#player3 {
+    top: 5%;
+    left: 50%;
+}
+
+#player4 {
+    top: 30%;
+    left: 82%;
+}
+
+#player5 {
+    top: 60%;
+    left: 82%;
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    height: 75px;
+    width: 50px;
+    margin: 3px;
+    padding: 2px;
+    font-size: 24px;
+}
+
+#myCards {
+    position: fixed;
+    display: flex;
+    left: 50%;
+    top: 88%;
+    transform: translate(-50%, -100%);
+}
+
+.myCard {
+    cursor: pointer;
+}
+
+.myCard:hover {
+    border: 3px solid #dd4a4a;
+    height: 69px;
+    width: 44px;
+    transform: translateY(-10px);
+}
+
+.liveCard {
+    margin: 5px 110px 5px 110px;
+    background-color: transparent;
+}
+
+#liveCardLayer1 {
+    margin-bottom: 50px;
+}
+
+#liveCardLayer2 {
+    margin-top: 50px;
+}
+
+.liveCardLayer {
+    display: flex;
+    justify-content: center;
+}
+
+#liveCards {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#bidding {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#bidNumber, #bidType {
+    padding: 3px;
+}
+
+.box {
+    border-radius: 5px;
+    border: 2px solid black;
+    position: absolute;
+    display: none;
+    background-color: white;
+    padding: 5px;
+}
+
+#bidType {
+    display: none;
+}
+
+#username {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+#username:focus {
+    box-shadow: 0 0 7px rgb(69, 175, 204);
+    outline: none;
+}
+
+.submit, .endGame {
+    border-radius: 3px;
+    padding: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.submit {
+    border: 1px solid rgb(9, 9, 124);
+    background-color: rgb(166, 198, 243);
+}
+
+.submit:hover:enabled {
+    background-color: rgb(9, 9, 124);
+    color: white;
+}
+
+.endGame {
+    border: 1px solid rgb(135, 0, 0);
+    background-color: rgb(243, 166, 166);
+}
+
+.endGame:hover:enabled {
+    background-color: rgb(135, 0, 0);
+    color: white;
+}
+
+#endGameInitial {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+}
+
+.playerBid {
+    color: black;
+}
+
+/* Scoreboard */
+
+#scoreboard {
+    right: 10px;
+    display: none;
+    font-size: 16px;
+    max-width: 250px;
+}
+
+#scores {
+    display: flex;
+}
+
+#gameInfo {
+    border-top: 1px solid black;
+    display: flex;
+}
+
+.scores {
+    padding: 6px;
+}
+
+.turnMarker, .bidder, .leader {
+    color: black;
+}
+
+.turnMarker {
+    animation:blinkingText 2.5s infinite;
+}
+
+@keyframes blinkingText{
+    0%{     opacity: 0%;      }
+    20%{    opacity: 70%;     }
+    35%{    opacity: 100%;     }
+    65%{    opacity: 90%;     }
+    80%{    opacity: 20%;     }
+    100%{   opacity: 10%;    }
+}
+
+#orangeScoreboard {
+    background-color: #f28a1b;
+    flex-grow: 1;
+}
+
+#blueScoreboard {
+    background-color: #3e6ba7;
+    flex-grow: 1;
+}
+
+.suitImage {
+    height: 24px;
+}
+
+#bid .suitImage {
+    height: 18px;
+}
+
+#gameover {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: xx-large;
+    font-weight: bold;
+    display: none;
+}
+
+.birthdayImage {
+    height: 200px;
+    left: 50%;
+    top: 50%;
+    position: fixed;
+    transform: translate(-50%, -60%);
+    z-index: -1;
+    opacity: 80%;
+}
+
+img {
+    max-height: 80px;
+}
+
+#scoreboard img {
+    max-height: 28px;
+}
+
+#roomLink {
+    font-size: 24px;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+}
+
+#endGameDiv {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    z-index: 5;
+    width: 500px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+
+    text-align: center;
+    font-size: 26px;
+    padding: 15px;
+}
+
+.playersLoggedIn {
+    font-size: 30px;
+}
+
+#orangePlayersLoggedIn {
+    float: left;
+}
+
+#bluePlayersLoggedIn {
+    float: right;
+}
+
+.orangePlayer {
+    color: #f28a1b;
+}
+
+.bluePlayer {
+    color: #174887;
+}
+
+#clearPlayersButtonContainer {
+    display: none;
+}

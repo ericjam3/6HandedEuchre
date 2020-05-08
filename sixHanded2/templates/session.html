@@ -1,0 +1,197 @@
+<!-- Need to update Room 1 to Room 2, Room 2 to Room 1, and :6542 to :6543 -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>6 Handed Euchre</title>
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mousetrap/1.4.6/mousetrap.min.js"></script>
+  <script src="../static/js/config.js"></script>
+  <script src="../static/js/sessionv2.js"></script>
+  <link rel="stylesheet" type="text/css" href="../static/css/session.css">
+  <link rel="icon" href="../static/images/clubs.png">
+</head>
+<body>
+  <div id="signinScreen">
+    <div id="title">
+      <img class='titleImage' src='../static/images/clubs.png'></img>
+      <img class='titleImage' src='../static/images/diamonds.png'></img>
+      <img class='titleImage' src='../static/images/spades.png'></img>
+      <img class='titleImage' src='../static/images/hearts.png'></img>
+      <div>6 Handed Euchre</div>
+      <div id="roomNumber"></div>
+    </div>
+    <form action="" method="POST" id="signin">
+      <input type="text" id="username" class="username" placeholder="Please enter your name"/>
+      <input type="submit" class="submit"/>
+    </form>
+    <p id="waiting">Waiting for other players!</p>
+    <br>
+    <br>
+    <br>
+    <div class='endGame' id="clearPlayersButtonContainer" onclick="endGame()">Clear Players</div>
+    <br>
+    <div class="playersLoggedIn" id="orangePlayersLoggedIn"></div>
+    <div class="playersLoggedIn" id="bluePlayersLoggedIn"></div>
+    <br>
+    <br>
+  </div>
+
+  <div id="roomLink">
+    
+  </div>
+
+  <div id="gametable">
+    <div id="gameover">
+      Ballgame
+    </div>
+
+    <button id="endGameInitial" class="endGame" onclick="endGameButton()">End Game</button>
+
+    <div class="player" id="player0">
+      
+    </div>
+    <div class="player" id="player1">
+      
+    </div>
+    <div class="player" id="player2">
+      
+    </div>
+    <div class="player" id="player3">
+      
+    </div>
+    <div class="player" id="player4">
+      
+    </div>
+    <div class="player" id="player5">
+      
+    </div>
+
+    <!-- Cards being played in current trick -->
+    <div id="liveCards">
+      <div id="liveCardLayer0" class="liveCardLayer">
+        <div class="card liveCard" id="liveCard3">
+
+        </div>
+      </div>
+
+      <div id="liveCardLayer1" class="liveCardLayer">
+        <div class="card liveCard" id="liveCard2">
+          
+        </div>
+        <div class="card liveCard" id="liveCard4">
+          
+        </div>
+      </div>
+
+      <div id="liveCardLayer2" class="liveCardLayer">
+        <div class="card liveCard" id="liveCard1">
+          
+        </div>
+        <div class="card liveCard" id="liveCard5">
+          
+        </div>
+      </div>
+
+      <div id="liveCardLayer3" class="liveCardLayer">
+        <div class="card liveCard" id="liveCard0">
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- To be populated by the player's cards -->
+    <div id="myCards">
+
+    </div>
+
+    <div id="bidding" class="box">
+      <select id="bidNumber" onchange="setupBidNumberChange()">
+        <option value=0>Pass</option>
+        <option value=1>1</option>
+        <option value=2>2</option>
+        <option value=3>3</option>
+        <option value=4>4</option>
+        <option value=5>5</option>
+        <option value=6>6</option>
+        <option value=7>7</option>
+        <option value=8>8</option>
+        <option value=9>Horse</option>
+        <option value=p>Pepper</option>
+      </select>
+      
+      <select id="bidType" onchange="setupBidTypeChange()">
+        <option value=""></option>
+        <option value="high">High</option>
+        <option value="low">Low</option>
+        <option value="c">Clubs</option>
+        <option value="d">Diamonds</option>
+        <option value="h">Hearts</option>
+        <option value="s">Spades</option>
+      </select>
+      
+      <button id="submitBid" class="submit" onclick="submitBid()">Submit</button>
+    </div>
+
+    <!-- <img class='birthdayImage' src='../static/images/logo.png'></img> -->
+  </div>
+
+  <div id="scoreboard" class="box">
+    <div id="scores">
+      <div id="orangeScoreboard" class="scores">
+        Score: <div id="orangeScore">
+          
+        </div>
+        Tricks: <div id="orangeTricksTaken">
+          
+        </div>
+      </div>
+      <div id="blueScoreboard" class="scores">
+        Score: <div id="blueScore">
+          
+        </div>
+        Tricks: <div id="blueTricksTaken">
+          
+        </div>
+      </div>
+    </div>
+    <div id="gameInfo">
+      <div class="scores">
+        <div>
+          Hands Left:
+        </div>
+        <div id="handsLeft">
+        </div>
+      </div>
+
+      <div class="scores">
+        <div>
+          Dealer:
+        </div>
+        <div id="dealer">
+        </div>
+      </div>
+
+      <div class="scores">
+        <div>
+          Bid:
+        </div>
+        <div id="bid">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="endGameDiv">
+    <div>Are you sure you want to end the game?</div>
+    <div>
+      <button id="keepPlaying" class="submit" onclick="keepPlayingButton()">No, Keep Playing</button>
+      <button id="endGameFinal" class="endGame" onclick="endGame()">End Game</button>
+    </div>
+  </div>
+</body>
+</html>
