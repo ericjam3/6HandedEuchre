@@ -1,4 +1,4 @@
-urlString = 'http://159.65.173.147:6666/';
+urlString = 'http://159.65.173.147:7666/';
 
 $(document).ready(function(){
     $("#roomNumber").html("Room 6");
