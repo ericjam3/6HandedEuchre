@@ -1,3 +1,5 @@
+# Now synced with Dev using ./copyFiles from 6HandedEuchre directory
+
 import random
 
 # Global variables

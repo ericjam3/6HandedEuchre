@@ -1,3 +1,5 @@
+# Now synced with Dev using ./copyFiles from 6HandedEuchre directory
+
 import smtplib, ssl
 
 from flask import Flask, render_template

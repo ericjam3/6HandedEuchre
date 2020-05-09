@@ -1,3 +1,5 @@
+// Now synced with Dev using ./copyFiles from 6HandedEuchre directory
+
 // variables
 var socket = io.connect(urlString);
 var username = "";
@@ -69,7 +71,13 @@ function showLoggedInPlayers(loggedInPlayers){
 
     $("#orangePlayersLoggedIn").html(orangeHtmlString);
     $("#bluePlayersLoggedIn").html(blueHtmlString);
-    $("#clearPlayersButtonContainer").show();
+
+    if (loggedInPlayers.length < 6){
+        $("#clearPlayersButtonContainer").show();
+    }else{
+        $("#clearPlayersButtonContainer").hide();
+        $("#roomFullDiv").show();
+    }
 }
 
 socket.on('disconnect', function(reason){
@@ -89,6 +97,7 @@ function setReconnectData(data){
 
 function setReconnectUI(){
     $("#signinScreen").hide();
+    $("#roomLink").hide();
     placePlayers();
     $("#gametable").show();
 
@@ -204,6 +213,7 @@ function setupBidTypeChange(){
 
 socket.on( 'begin', function( players ) {
     $( '#signinScreen' ).hide();
+    $("#roomLink").hide();
 
     // Setup playersArray
     playerPosition = players.indexOf(username);

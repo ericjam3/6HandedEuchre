@@ -291,6 +291,20 @@ img {
     position: fixed;
     top: 10px;
     right: 10px;
+    text-align: center;
+
+    border: 2px solid black;
+    border-radius: 4px;
+    background-color: white;
+    padding: 15px;
+}
+
+#roomLink div {
+    margin: 5px;
+}
+
+#otherRooms {
+    font-weight: bolder;
 }
 
 #endGameDiv {
@@ -332,4 +346,10 @@ img {
 
 #clearPlayersButtonContainer {
     display: none;
+}
+
+#roomFullDiv {
+    display: none;
+    font-size: 26px;
+    font-weight: bold;
 }

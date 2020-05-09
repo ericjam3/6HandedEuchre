@@ -3,7 +3,8 @@ urlString = 'http://159.65.173.147:5555/';
 $(document).ready(function(){
     $("#roomNumber").html("Room 5");
 
-    var roomLinkString = '<div><a href="http://159.65.173.147:6543/">Go To Room 1</a></div>' +
+    var roomLinkString = '<div id="otherRooms">OTHER ROOMS</div>' +
+    '<div><a href="http://159.65.173.147:6543/">Go To Room 1</a></div>' +
     '<div><a href="http://159.65.173.147:6542/">Go To Room 2</a></div>' +
     '<div><a href="http://159.65.173.147:3333/">Go To Room 3</a></div>' +
     '<div><a href="http://159.65.173.147:4444/">Go To Room 4</a></div>' +
