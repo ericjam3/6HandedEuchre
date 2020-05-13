@@ -128,6 +128,7 @@ function setGameState(data){
             dropTwoCardsHorse();
         }else{
             showDropping(dicts.highBid.playerInd);
+            currentStage = "waiting";
         }
     }else if (currentStage == "passHorse"){
         if (playerPosition == getPlayerIndBasedOnOffset(data.gameState.playerTurn, dicts.highBid.playerInd)){
@@ -135,6 +136,7 @@ function setGameState(data){
             passCardHorse();
         }else{
             showPassing(getPlayerIndBasedOnOffset(data.gameState.playerTurn, dicts.highBid.playerInd));
+            currentStage = "waiting";
         }
     }
 }

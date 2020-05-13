@@ -1,12 +1,14 @@
 # Now synced with Dev using ./copyFiles from 6HandedEuchre directory
 
 import random
+from ai import AI
 
 # Global variables
 players = []
 numPlayers = 6
 cardsPlayed = 0
 currentDeck = []
+botDict = {}
 dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}
 
 # Info needed for when a player reconnects
@@ -93,8 +95,10 @@ def resetGame():
     global passedCards
     global cardsPlayed
     global currentDeck
+    global botDict
 
     dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}
+    botDict = {}
     players = []
 
     currentStage = "signIn"
@@ -174,3 +178,25 @@ def startNewTrick():
 
 def getTrump():
     return dicts["highBid"]["type"]
+
+###############################################################
+
+def addBot(name, index):
+    global botDict
+
+    addPlayer(name)
+    botDict[name] = AI(name, index, 5)
+
+def dealCardsToBots(deck):
+    global botDict
+
+    for key in botDict:
+        bot = botDict[key]
+        botIndex = bot.getIndex()
+        startCard = botIndex * 8
+        stopCard = startCard + 8
+
+        bot.dealCards(deck[startCard:stopCard])
+
+        if (botIndex == dicts["handInfo"]["dealer"]):
+            bot.tryBidding([], dicts["handInfo"])

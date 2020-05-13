@@ -24,10 +24,14 @@
       <div>6 Handed Euchre</div>
       <div id="roomNumber"></div>
     </div>
-    <form action="" method="POST" id="signin">
+    <div>
+    <div id="signin">
       <input type="text" id="username" class="username" placeholder="Please enter your name"/>
-      <input type="submit" class="submit"/>
-    </form>
+      <input type="submit" id="submitNameButton" class="submit" onclick="submitName()"/>
+      OR
+      <button id="addBotButton" class="neutral" onclick="addBot()">Add Bot</button>
+    </div>
+    </div>
     <p id="waiting">Waiting for other players!</p>
     <br>
     <br>
@@ -42,6 +46,14 @@
 
   <div id="roomLink">
     
+  </div>
+
+  <div id="botForm">
+    <label for="botName">Name:</label>
+    <input type="text" id="botName" class="username"/><br>
+    <label for="riskLevel">Aggressiveness (1 to 10):</label>
+    <input type="number" id="riskLevel" class="username" min="1" max="10"/><br>
+    <input type="submit" id="submitBotName" class="submit" onclick="submitBot()"/>
   </div>
 
   <div id="gametable">

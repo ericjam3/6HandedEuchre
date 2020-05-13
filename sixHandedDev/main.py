@@ -37,23 +37,30 @@ def handle_signin(json, methods=['GET', 'POST']):
     if (len(dataModel.players) < dataModel.numPlayers) and (json['user_name'] not in dataModel.players):
         dataModel.addPlayer(json['user_name'])
         socketio.emit('playersIn', {"players": dataModel.players})
-
-        print(json['user_name'])
-
-        # Everyone is signed in now
-        if len(dataModel.players) == dataModel.numPlayers:
-            socketio.emit('begin', dataModel.players)
-
-            dataModel.setInitialGameInfo()
-            dealCards()
+        tryStartingGame()
     
     elif (json['user_name'] in dataModel.players):
         reconnectPlayer(json['user_name'])
+
+@socketio.on('add bot')
+def handle_add_bot(json, methods=['GET', 'POST']):
+    if (len(dataModel.players) < dataModel.numPlayers) and (json['botName'] not in dataModel.players):
+        dataModel.addBot(json['botName'], len(dataModel.players))
+        socketio.emit('playersIn', {"players": dataModel.players})
+        tryStartingGame()
+
+def tryStartingGame():
+    if len(dataModel.players) == dataModel.numPlayers:
+        socketio.emit('begin', dataModel.players)
+
+        dataModel.setInitialGameInfo()
+        dealCards()
 
 def dealCards():
     dataModel.currentStage = "bidding"
     deck = dataModel.getShuffledDeck()
     socketio.emit('deal', {"deck": deck, "dicts": dataModel.dicts})
+    dataModel.dealCardsToBots(deck)
 
 @socketio.on('submit bid')
 def handle_submit_bid(json, methods=['GET', 'POST']):
