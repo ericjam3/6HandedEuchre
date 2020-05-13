@@ -210,6 +210,16 @@ function checkIfLeading(cardsPlayed){
     return false;
 }
 
+$(document).ready(function(){
+    let usernameInput = document.getElementById("username");
+
+    usernameInput.addEventListener("keyup", function(event){
+        if (event.keyCode === 13){
+            submitName();
+        }
+    });
+});
+
 //////////////////////////////////////////////////////////
 
 function setUIToWaiting(){
