@@ -61,9 +61,48 @@ class AI:
             else:
                 points[suit] += 1
             
-        return self.getEstimatedTricksHighLow(points, howManyOfEachSuit)
+        return self.adjustBid(self.getEstimatedTricksHighLow(points, howManyOfEachSuit), "high", bidsList)
 
-    def getEstimatedTricksHighLow(points, howManyOfEachSuit):
+    def adjustBid(self, baseBidNumber, baseBidType, bidsList):
+        sameBids = {"us": 0, "them": 0}
+        highBids = {"us": 0, "them": 0}
+        nextSuitBids = {"us": 0, "them": 0}
+
+        for i in range(len(bidsList)):
+            bid = bidsList[i]
+
+            if bid is None:
+                continue
+
+            if bid["bidType"] == baseBidType:
+                if (self.getIndex() % 2) == (i % 2):
+                    sameBids["us"] = max(sameBids["us"], bid["bidNumber"])
+                else:
+                    sameBids["them"] = max(sameBids["them"], bid["bidNumber"])
+
+            elif self.isNextSuit(bid["bidType"], baseBidType):
+                if (self.getIndex() % 2) == (i % 2):
+                    nextSuitBids["us"] = max(nextSuitBids["us"], bid["bidNumber"])
+                else:
+                    nextSuitBids["them"] = max(nextSuitBids["them"], bid["bidNumber"])
+                
+            if bid["bidType"] == "high":
+                if (self.getIndex() % 2) == (i % 2):
+                    highBids["us"] = max(highBids["us"], bid["bidNumber"])
+                else:
+                    highBids["them"] = max(highBids["them"], bid["bidNumber"])
+
+        finalBid = baseBidNumber + sameBids["us"] - (sameBids["them"] * .5)
+        if baseBidType != "low" and baseBidType != "high":
+            finalBid += (highBids["us"] * .4) - (highBids["them"] * .5)
+            finalBid += (nextSuitBids["us"] * .25) - (nextSuitBids["them"] * .45)
+
+        if sameBids["us"] > 2:
+            finalBid -= (.3 * sameBids["us"])
+
+        return finalBid
+
+    def getEstimatedTricksHighLow(self, points, howManyOfEachSuit):
         estimatedTricks = 0
 
         for key in points:
@@ -74,12 +113,21 @@ class AI:
             elif pointsInSuit > 200:
                 estimatedTricks += 2
             elif pointsInSuit > 100:
-                if howManyOfEachSuit[key] > 1 or len(bidsList) > 4:
+                if howManyOfEachSuit[key] > 1 or howManyPreviousBidders(bidsList) >= 4:
                     estimatedTricks += 1
                 else:
                     estimatedTricks += .5
 
         return estimatedTricks
+
+    def howManyPreviousBidders(bidsList):
+        numBidders = 0
+
+        for bid in bidsList:
+            if bid is not None:
+                numBidders += 1
+
+        return numBidders
 
     def getSuit(self, card):
         return card[0:1]
@@ -104,7 +152,7 @@ class AI:
             else:
                 points[suit] += 1
             
-        return self.getEstimatedTricksHighLow(points, howManyOfEachSuit)
+        return self.adjustBid(self.getEstimatedTricksHighLow(points, howManyOfEachSuit), "low", bidsList)
 
     def calcSuitBid(self, trump, bidsList, gameState):
         estimatedTricks = 0
@@ -125,12 +173,15 @@ class AI:
             elif rank == 14:
                 estimatedTricks += .4
 
-        return estimatedTricks
+        return self.adjustBid(estimatedTricks, trump, bidsList)
         
     def isLeftBower(self, rank, suit, trump):
         if rank != 11:
             return False
 
+        return self.isNextSuit(suit, trump)
+
+    def isNextSuit(self, suit, trump):
         if suit == "c" and trump == "s":
             return True
         elif suit == "d" and trump == "h":
