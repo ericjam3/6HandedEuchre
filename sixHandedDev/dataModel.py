@@ -9,6 +9,7 @@ numPlayers = 6
 cardsPlayed = 0
 currentDeck = []
 botDict = {}
+bidsList = []
 dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}
 
 # Info needed for when a player reconnects
@@ -37,6 +38,9 @@ def setPlayerHands(deck):
 def setCurrentPlayer(player):
     global playerTurn
     playerTurn = player
+
+def getCurrentPlayer():
+    return playerTurn
 
 def setBid(bidInfo):
     bids[bidInfo["currentBidder"]] = {"bidNumber": bidInfo["bidNumber"], "bidType": bidInfo["bidType"]}
@@ -96,6 +100,7 @@ def resetGame():
     global cardsPlayed
     global currentDeck
     global botDict
+    global bidsList
 
     dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}
     botDict = {}
@@ -109,6 +114,7 @@ def resetGame():
     passedCards = []
 
     cardsPlayed = 0
+    bidsList = []
     currentDeck = []
 
 def resetHand():
@@ -151,8 +157,10 @@ def getShuffledDeck():
 
 def setInitialHandInfo():
     global cardsPlayed
+    global bidsList
 
     cardsPlayed = 0
+    bidsList = []
     dicts["handInfo"]["orangeTricks"] = 0
     dicts["handInfo"]["blueTricks"] = 0
     dicts["handInfo"]["tricksPlayed"] = 0
@@ -189,14 +197,38 @@ def addBot(name, index):
 
 def dealCardsToBots(deck):
     global botDict
+    global dicts
 
     for key in botDict:
         bot = botDict[key]
+
         botIndex = bot.getIndex()
         startCard = botIndex * 8
         stopCard = startCard + 8
 
         bot.dealCards(deck[startCard:stopCard])
 
-        if (botIndex == dicts["handInfo"]["dealer"]):
-            bot.tryBidding([], dicts["handInfo"])
+def tryBotBidding(bidderInd, bidsList):
+    global dicts
+
+    for key in botDict:
+        bot = botDict[key]
+
+        botIndex = bot.getIndex()
+
+        if (botIndex == bidderInd):
+            botBidInfo = bot.tryBidding(bidsList, dicts["handInfo"])
+            botBidInfo["currentBidder"] = botIndex
+            botBidInfo["nextBidder"] = getNextBidder(botIndex)
+            botBidInfo["dicts"] = dicts
+            return botBidInfo
+    
+    return -1
+
+def getNextBidder(currentBidder):
+    nextBidder = currentBidder + 1
+
+    if nextBidder > 5:
+        nextBidder = 0
+    
+    return nextBidder
