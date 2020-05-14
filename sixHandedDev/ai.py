@@ -42,7 +42,18 @@ class AI:
             highestBidType = "low"
             highestBidNumber = lowBid
 
-        return {"bidNumber": round(highestBidNumber), "bidType": highestBidType}
+        highestBidNumber = round(highestBidNumber)
+        return {"bidNumber": self.finalBidNumber(bidsList, highestBidNumber), "bidType": highestBidType}
+
+    def finalBidNumber(self, bidsList, highestBidNumber):
+        for bid in bidsList:
+            if bid is None:
+                continue
+
+            if int(bid["bidNumber"]) >= highestBidNumber:
+                return "0"
+            
+        return str(highestBidNumber)
 
     def calcHighBid(self, bidsList, gameState):
         howManyOfEachSuit = {"c": 0, "d": 0, "h": 0, "s": 0}
@@ -74,23 +85,25 @@ class AI:
             if bid is None:
                 continue
 
+            otherBidNumber = int(bid["bidNumber"])
+
             if bid["bidType"] == baseBidType:
                 if (self.getIndex() % 2) == (i % 2):
-                    sameBids["us"] = max(sameBids["us"], bid["bidNumber"])
+                    sameBids["us"] = max(sameBids["us"], otherBidNumber)
                 else:
-                    sameBids["them"] = max(sameBids["them"], bid["bidNumber"])
+                    sameBids["them"] = max(sameBids["them"], otherBidNumber)
 
             elif self.isNextSuit(bid["bidType"], baseBidType):
                 if (self.getIndex() % 2) == (i % 2):
-                    nextSuitBids["us"] = max(nextSuitBids["us"], bid["bidNumber"])
+                    nextSuitBids["us"] = max(nextSuitBids["us"], otherBidNumber)
                 else:
-                    nextSuitBids["them"] = max(nextSuitBids["them"], bid["bidNumber"])
+                    nextSuitBids["them"] = max(nextSuitBids["them"], otherBidNumber)
                 
             if bid["bidType"] == "high":
                 if (self.getIndex() % 2) == (i % 2):
-                    highBids["us"] = max(highBids["us"], bid["bidNumber"])
+                    highBids["us"] = max(highBids["us"], otherBidNumber)
                 else:
-                    highBids["them"] = max(highBids["them"], bid["bidNumber"])
+                    highBids["them"] = max(highBids["them"], otherBidNumber)
 
         finalBid = baseBidNumber + sameBids["us"] - (sameBids["them"] * .5)
         if baseBidType != "low" and baseBidType != "high":
