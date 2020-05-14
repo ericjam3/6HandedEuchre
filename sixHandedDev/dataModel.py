@@ -9,7 +9,6 @@ numPlayers = 6
 cardsPlayed = 0
 currentDeck = []
 botDict = {}
-bidsList = []
 dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}
 
 # Info needed for when a player reconnects
@@ -100,7 +99,6 @@ def resetGame():
     global cardsPlayed
     global currentDeck
     global botDict
-    global bidsList
 
     dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}
     botDict = {}
@@ -114,7 +112,6 @@ def resetGame():
     passedCards = []
 
     cardsPlayed = 0
-    bidsList = []
     currentDeck = []
 
 def resetHand():
@@ -157,10 +154,8 @@ def getShuffledDeck():
 
 def setInitialHandInfo():
     global cardsPlayed
-    global bidsList
 
     cardsPlayed = 0
-    bidsList = []
     dicts["handInfo"]["orangeTricks"] = 0
     dicts["handInfo"]["blueTricks"] = 0
     dicts["handInfo"]["tricksPlayed"] = 0
@@ -208,8 +203,9 @@ def dealCardsToBots(deck):
 
         bot.dealCards(deck[startCard:stopCard])
 
-def tryBotBidding(bidderInd, bidsList):
+def tryBotBidding(bidderInd):
     global dicts
+    global bids
 
     for key in botDict:
         bot = botDict[key]
@@ -217,10 +213,11 @@ def tryBotBidding(bidderInd, bidsList):
         botIndex = bot.getIndex()
 
         if (botIndex == bidderInd):
-            botBidInfo = bot.tryBidding(bidsList, dicts["handInfo"])
+            botBidInfo = bot.tryBidding(bids, dicts["handInfo"])
             botBidInfo["currentBidder"] = botIndex
             botBidInfo["nextBidder"] = getNextBidder(botIndex)
             botBidInfo["dicts"] = dicts
+
             return botBidInfo
     
     return -1

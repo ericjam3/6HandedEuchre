@@ -61,10 +61,10 @@ def dealCards():
     deck = dataModel.getShuffledDeck()
     socketio.emit('deal', {"deck": deck, "dicts": dataModel.dicts})
     dataModel.dealCardsToBots(deck)
-    tryBotBidding(dataModel.dicts["handInfo"]["dealer"], [])
+    tryBotBidding(dataModel.dicts["handInfo"]["dealer"])
 
-def tryBotBidding(bidderInd, bidsList):
-    botBidInfo = dataModel.tryBotBidding(bidderInd, bidsList)
+def tryBotBidding(bidderInd):
+    botBidInfo = dataModel.tryBotBidding(bidderInd)
     if botBidInfo == -1:
         return
 
@@ -96,7 +96,7 @@ def handle_submit_bid(json, methods=['GET', 'POST']):
         json["dicts"] = dataModel.dicts
         dataModel.setCurrentPlayer(json["nextBidder"])
 
-        tryBotBidding(dataModel.getCurrentPlayer(), [])
+        tryBotBidding(dataModel.getCurrentPlayer())
         socketio.emit('bid placed', json)
 
 # Determine who has the highest bid and what it is

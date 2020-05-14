@@ -53,7 +53,7 @@ class AI:
             rank = self.getRank(card)
 
             howManyOfEachSuit[suit] += 1
-            
+
             if rank == 14:
                 points[suit] += 100
             elif rank == 13:
@@ -61,7 +61,7 @@ class AI:
             else:
                 points[suit] += 1
             
-        return getEstimatedTricksHighLow(points, howManyOfEachSuit)
+        return self.getEstimatedTricksHighLow(points, howManyOfEachSuit)
 
     def getEstimatedTricksHighLow(points, howManyOfEachSuit):
         estimatedTricks = 0
@@ -104,7 +104,7 @@ class AI:
             else:
                 points[suit] += 1
             
-        return getEstimatedTricksHighLow(points, howManyOfEachSuit)
+        return self.getEstimatedTricksHighLow(points, howManyOfEachSuit)
 
     def calcSuitBid(self, trump, bidsList, gameState):
         estimatedTricks = 0
@@ -123,7 +123,7 @@ class AI:
                 estimatedTricks += .75
 
             elif rank == 14:
-                estimatedTricks += .45
+                estimatedTricks += .4
 
         return estimatedTricks
         
@@ -153,8 +153,3 @@ class AI:
 
     def passHorse(self):
         print("TODO")
-
-    
-
-    
-    
