@@ -237,6 +237,8 @@ class AI:
 
         return False
 
+#############################################################################
+
     def startHand(self, bidInfo):
         self.bid = bidInfo
         self.cardsRemaining = {}
@@ -257,7 +259,7 @@ class AI:
         self.cardsRemaining[trump] = 290
         self.highCards[trump] = trump + "11"
 
-    def playCard(self, handState, cardsPlayed, liveCards):
+    def playCard(self, handState, cardsPlayed, trickInfo):
         cardPlayedInfo = {}
 
         if cardsPlayed == 0:
@@ -265,24 +267,29 @@ class AI:
             cardPlayedInfo["cardPlayed"] = card
             cardPlayedInfo["suitLead"] = self.getSuitRespectingTrump(card)
         else:
-            cardPlayedInfo["cardPlayed"] = self.chooseCard(handState)
+            cardPlayedInfo["cardPlayed"] = self.chooseCard(handState, trickInfo)
 
         return cardPlayedInfo
 
     def startTrick(self, handState):
         if self.bid["type"] == "high":
-            self.startTrickHigh()
+            return self.startTrickHigh()
         elif self.bid["type"] == "low":
-            self.startTrickLow()
+            return self.startTrickLow()
         else:
-            self.startTrickSuit()
+            return self.startTrickSuit(self.bid["type"])
 
     def startTrickHigh(self):
         bestLead = self.checkAcesNines(14)
         if bestLead is not None:
             return bestLead
 
-        bestLead = self.checkRunner(13, True)        
+        bestLead = self.checkRunner(13, True)
+
+        if bestLead is not None:
+            return bestLead
+
+         return self.getWorstCardTrumpHigh()
 
     def checkAcesNines(self, bestRank):
         for card in self.myCards:
@@ -303,6 +310,8 @@ class AI:
                 return self.bestOfSuit(suit, isHigh)
             elif (self.highCards[suit] == suit + str(secondRank)) and (rank == secondRank):
                 return card
+            else:
+                return None
 
     def bestOfSuit(self, checkSuit, isHigh):
         bestCard = None
@@ -316,6 +325,7 @@ class AI:
                 elif isHigh and (rank > self.getRank(bestCard)):
                     bestCard = card
                 elif not isHigh and (rank < self.getRank(bestCard)):
+                    bestCard = card
 
         return bestCard
 
@@ -326,8 +336,119 @@ class AI:
 
         bestLead = self.checkRunner(10, False)
 
-    def startTrickSuit(self):
-        print("TODO")
+        if bestLead is not None:
+            return bestLead
+
+        return self.getWorstCardLow()
+
+    def startTrickSuit(self, trump):
+        bestLead = self.checkForBestTrump(trump)
+
+        if bestLead is not None:
+            return bestLead
+
+        bestLead = self.checkForOffAces(self.bid["type"])
+
+        if bestLead is not None:
+            return bestLead
+
+        return self.getWorstCardTrumpHigh()
+
+    def checkForBestTrump(self, trump):
+        for card in self.myCards:
+            if card == self.highCards[trump]:
+                return card
+
+        return None
+
+    def checkForOffAces(self, trump):
+        nextSuit = self.getNextSuit(trump)
+
+        nextSuitAce = None
+
+        for card in self.myCards:
+            rank = self.getRank(card)
+            suit = self.getSuit(card)
+
+            if (rank == 14) and (suit != trump) and (suit != nextSuit):
+                return card
+            elif (rank == 14) and (suit == nextSuit):
+                nextSuitAce = card
+
+        return nextSuitAce
+
+    def getNextSuit(self, trump):
+        if trump == "c":
+            return "s"
+        elif trump == "d":
+            return "h"
+        elif trump == "h":
+            return "d"
+        elif trump == "s":
+            return "c"
+
+        return None
+    
+    def getWorstCardTrumpHigh(self):
+        lowCard = None
+
+        for card in self.myCards:
+            if lowCard == None:
+                lowCard = card
+            else:
+                lowCard = self.getWorseCardCompare(lowCard, card)
+
+        return lowCard
+
+    def getWorstCardLow(self):
+        highCard = None
+        
+        for card in self.myCards:
+            if highCard == None:
+                highCard = card
+            else:
+                highCard = self.getBestCardCompare(highCard, card)
+
+        return highCard
+    
+    def getWorseCardCompare(self, cardA, cardB):
+        trump = self.bid["type"]
+
+        suitA = self.getSuitRespectingTrump(cardA, trump)
+        suitB = self.getSuitRespectingTrump(cardB, trump)
+
+        rankA = self.getRank(cardA)
+        rankB = self.getRank(cardB)
+
+        if suitA == trump and suitB != trump:
+            return cardB
+        elif suitA != trump and suitB == trump:
+            return cardA
+        elif suitA == trump and suitB == trump:
+            if cardA == trump + "11":
+                return cardB
+            elif cardB == trump + "11":
+                return cardA
+            elif self.isLeftBower(rankA, suitA, trump):
+                return cardB
+            elif self.isLeftBower(rankB, suitB, trump):
+                return cardA
+            elif rankA > rankB:
+                return cardB
+            else:
+                return cardA
+        else:
+            if rankA > rankB:
+                return cardB
+            else:
+                return cardA
+
+    def getBestCardCompare(self, cardA, cardB):
+        tempCard = self.getWorseCardCompare(cardA, cardB)
+        if (cardA == tempCard):
+            return cardB
+        else:
+            return cardA
 
     def getSuitRespectingTrump(self, card, trump):
         rank = self.getRank(card)
@@ -338,8 +459,13 @@ class AI:
         
         return suit
 
-    def chooseCard(self, handState):
-        print("TODO")
+    def chooseCard(self, handState, trickInfo):
+        myTeamWinning = False
+        if (trickInfo["highPlayer"] % 2) == (self.getIndex() % 2):
+            myTeamWinning = True
+
+        
+
 
     def recalculateCardsRemaining(self, card):
         if self.bid["type"] == "high":
@@ -406,6 +532,8 @@ class AI:
             return "d11"
         elif trump == "s":
             return "c11"
+
+        return None
 
     def dropHorse(self):
         print("TODO")

@@ -250,7 +250,7 @@ def playBotCard(curPlayerInd):
         botIndex = bot.getIndex()
 
         if (botIndex == bidderInd):
-            botPlayInfo = bot.playCard(dicts["handInfo"], cardsPlayed)
+            botPlayInfo = bot.playCard(dicts["handInfo"], cardsPlayed, dicts["trickInfo"])
             botPlayInfo["playerPosition"] = botIndex
             botPlayInfo["nextPlayer"] = getNextPlayer(botIndex)
             botPlayInfo["dicts"] = dicts
