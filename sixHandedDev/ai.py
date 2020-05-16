@@ -1,8 +1,11 @@
+import math
+
 class AI:
     def __init__(self, name, playerIndex, riskLevel):
         self.name = name
         self.playerIndex = playerIndex
         self.riskLevel = riskLevel
+        self.suits = ["c", "d", "h", "s"]
 
     def getName(self):
         return self.name
@@ -42,7 +45,7 @@ class AI:
             highestBidType = "low"
             highestBidNumber = lowBid
 
-        highestBidNumber = round(highestBidNumber)
+        highestBidNumber = self.trueRound(highestBidNumber)
         return {"bidNumber": self.finalBidNumber(bidsList, highestBidNumber), "bidType": highestBidType}
 
     def finalBidNumber(self, bidsList, highestBidNumber):
@@ -53,7 +56,7 @@ class AI:
             if int(bid["bidNumber"]) >= highestBidNumber:
                 return "0"
             
-        return str(highestBidNumber)
+        return str(int(highestBidNumber))
 
     def calcHighBid(self, bidsList, gameState):
         howManyOfEachSuit = {"c": 0, "d": 0, "h": 0, "s": 0}
@@ -72,7 +75,7 @@ class AI:
             else:
                 points[suit] += 1
             
-        return self.adjustBid(self.getEstimatedTricksHighLow(points, howManyOfEachSuit), "high", bidsList)
+        return self.adjustBid(self.getEstimatedTricksHighLow(points, howManyOfEachSuit, bidsList), "high", bidsList)
 
     def adjustBid(self, baseBidNumber, baseBidType, bidsList):
         sameBids = {"us": 0, "them": 0}
@@ -115,7 +118,7 @@ class AI:
 
         return finalBid
 
-    def getEstimatedTricksHighLow(self, points, howManyOfEachSuit):
+    def getEstimatedTricksHighLow(self, points, howManyOfEachSuit, bidsList):
         estimatedTricks = 0
 
         for key in points:
@@ -123,17 +126,17 @@ class AI:
 
             if pointsInSuit >= 240:
                 estimatedTricks += howManyOfEachSuit[key]
-            elif pointsInSuit > 200:
+            elif pointsInSuit >= 200:
                 estimatedTricks += 2
-            elif pointsInSuit > 100:
-                if howManyOfEachSuit[key] > 1 or howManyPreviousBidders(bidsList) >= 4:
+            elif pointsInSuit >= 100:
+                if howManyOfEachSuit[key] > 1 or self.howManyPreviousBidders(bidsList) >= 4:
                     estimatedTricks += 1
                 else:
                     estimatedTricks += .5
 
         return estimatedTricks
 
-    def howManyPreviousBidders(bidsList):
+    def howManyPreviousBidders(self, bidsList):
         numBidders = 0
 
         for bid in bidsList:
@@ -165,28 +168,56 @@ class AI:
             else:
                 points[suit] += 1
             
-        return self.adjustBid(self.getEstimatedTricksHighLow(points, howManyOfEachSuit), "low", bidsList)
+        return self.adjustBid(self.getEstimatedTricksHighLow(points, howManyOfEachSuit, bidsList), "low", bidsList)
 
     def calcSuitBid(self, trump, bidsList, gameState):
-        estimatedTricks = 0
+        howManyTrump = 0
+        howManyOffSuitAces = 0
+        points = 0
 
         for card in self.myCards:
             suit = self.getSuit(card)
             rank = self.getRank(card)
 
             if suit == trump:
+                howManyTrump += 1
+
                 if rank == 11:
-                    estimatedTricks += 1
+                    points += 100
                 else:
-                    estimatedTricks += .5
+                    points += 1
             
             elif self.isLeftBower(rank, suit, trump):
-                estimatedTricks += .75
+                howManyTrump += 1
+
+                points += 40
 
             elif rank == 14:
-                estimatedTricks += .4
+                howManyOffSuitAces += 1
+
+        estimatedTricks = self.calcSuitPoints(points, howManyTrump, howManyOffSuitAces)
 
         return self.adjustBid(estimatedTricks, trump, bidsList)
+
+    def calcSuitPoints(self, points, howManyTrump, howManyOffSuitAces):
+        estimatedTricks = 0
+
+        if points >= 280 or (points >= 240 and howManyTrump > 4) or points == 240:
+            estimatedTricks = howManyTrump + howManyOffSuitAces
+        elif points > 240:
+            estimatedTricks = howManyTrump + howManyOffSuitAces - .5
+        elif points >= 200:
+            estimatedTricks = 2 + (.5 * (howManyTrump - 2)) + (.5 * howManyOffSuitAces) + .1
+        elif points >= 180:
+            estimatedTricks = 2.5 + (.6 * (howManyTrump - 3)) + (.6 * howManyOffSuitAces) + .1
+        elif points >= 140:
+            estimatedTricks = 1.5 + (.5 * (howManyTrump - 2)) + (.3 * howManyOffSuitAces)
+        elif points >= 100:
+            estimatedTricks = 1 + (.5 * (howManyTrump - 1)) + (.3 * howManyOffSuitAces)
+        else:
+            estimatedTricks = (.5 * howManyTrump) + (.3 * howManyOffSuitAces)
+
+        return estimatedTricks            
         
     def isLeftBower(self, rank, suit, trump):
         if rank != 11:
@@ -207,13 +238,116 @@ class AI:
         return False
 
     def startHand(self, bidInfo):
+        self.bid = bidInfo
+        self.cardsRemaining = {}
+
+        self.initializeCardsRemaining()
+
+        if self.bid["type"] != "high" and self.bid["type"] != "low":
+            self.initializeCardsRemainingSuit()
+        
+    def initializeCardsRemaining(self):
+        for suit in suits:
+            self.cardsRemaining[suit] = 280
+            self.highCards[suit] = suit + "14"
+
+    def initializeCardsRemainingSuit(self):
+        trump = self.bid["type"]
+
+        self.cardsRemaining[trump] = 290
+        self.highCards[trump] = trump + "11"
+
+    def playCard(self, handState, cardsPlayed, liveCards):
+        cardPlayedInfo = {}
+
+        if cardsPlayed == 0:
+            card = self.startTrick(handState)
+            cardPlayedInfo["cardPlayed"] = card
+            cardPlayedInfo["suitLead"] = self.getSuitRespectingTrump(card)
+        else:
+            cardPlayedInfo["cardPlayed"] = self.chooseCard(handState)
+
+        return cardPlayedInfo
+
+    def startTrick(self, handState):
+        if self.bid["type"] == "high":
+            self.startTrickHigh()
+        elif self.bid["type"] == "low":
+            self.startTrickLow()
+        else:
+            self.startTrickSuit()
+
+    def startTrickHigh(self):
         print("TODO")
 
-    def playCard(self, handState, cardsPlayed):
+    def startTrickLow(self):
         print("TODO")
+
+    def startTrickSuit(self):
+        print("TODO")
+
+    def getSuitRespectingTrump(self, card, trump):
+        rank = self.getRank(card)
+        suit = self.getSuit(card)
+
+        if suit == trump or self.isLeftBower(rank, suit, trump):
+            return trump
+        
+        return suit
+
+    def chooseCard(self, handState):
+        print("TODO")
+
+    def recalculateCardsRemaining(self, card):
+        if self.bid["type"] == "high":
+            self.recalculateHighRemaining(card)
+        elif self.bid["type"] == "low":
+            self.recalculateLowRemaining(card)
+        else:
+            self.recalculateSuitRemaining(card, self.bid["type"])
+
+    def recalculateHighRemaining(self, card):
+        suit = self.getSuit(card)
+        rank = self.getRank(card)
+
+        if rank == 14:
+            self.cardsRemaining[suit] -= 100
+        elif rank == 13:
+            self.cardsRemaining[suit] -= 40
+
+    def recalculateLowRemaining(self, card):
+        suit = self.getSuit(card)
+        rank = self.getRank(card)
+
+        if rank == 9:
+            self.cardsRemaining[suit] -= 100
+        elif rank == 10:
+            self.cardsRemaining[suit] -= 40
+
+    def recalculateSuitRemaining(self, card, trump):
+        suit = self.getSuit(card)
+        rank = self.getRank(card)
+
+        if suit == trump:
+            if rank == 11:
+                self.cardsRemaining[trump] -= 100
+            else:
+                self.cardsRemaining[trump] -= 1
+        
+        elif self.isLeftBower(rank, suit, trump):
+            self.cardsRemaining[trump] = -40
+
+        else:
+            recalculateHighRemaining(card)
 
     def dropHorse(self):
         print("TODO")
 
     def passHorse(self):
         print("TODO")
+
+    def trueRound(self, number):
+        if (number % 1) > .5:
+            return math.ceil(number)
+        else:
+            return math.floor(number)

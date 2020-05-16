@@ -68,10 +68,20 @@ def tryBotBidding(bidderInd):
     if botBidInfo == -1:
         return
 
-    handle_submit_bid(botBidInfo)
+    socketio.sleep(1)
+    submitBid(botBidInfo)
+
+def tryBotPlaying(curPlayerInd):
+    botPlayInfo = dataModel.playBotCard(curPlayerInd)
+
+    socketio.sleep(1)
+    playCard(botPlayInfo)
 
 @socketio.on('submit bid')
 def handle_submit_bid(json, methods=['GET', 'POST']):
+    submitBid(json)    
+
+def submitBid(json):
     determineHighBid(json)
 
     dataModel.setBid(json)
@@ -91,13 +101,15 @@ def handle_submit_bid(json, methods=['GET', 'POST']):
         dataModel.currentStage = "playCards"
         dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
 
-        socketio.emit('done bidding', json)  
+        socketio.emit('done bidding', json)
+        dataModel.startHandBot()
+        tryBotPlaying(dataModel.getCurrentPlayer())
     else:
         json["dicts"] = dataModel.dicts
         dataModel.setCurrentPlayer(json["nextBidder"])
 
-        tryBotBidding(dataModel.getCurrentPlayer())
         socketio.emit('bid placed', json)
+        tryBotBidding(dataModel.getCurrentPlayer())
 
 # Determine who has the highest bid and what it is
 def determineHighBid(bidInfo):
@@ -121,6 +133,9 @@ def determineHighBid(bidInfo):
 # Play a card
 @socketio.on('play card')
 def handle_card_played(json, methods=['GET', 'POST']):
+    playCard(json)
+
+def playCard(json):
     if json["cardPlayed"]:
         trackWhoWinningTrick(json)
 

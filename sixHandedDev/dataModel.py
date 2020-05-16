@@ -46,6 +46,7 @@ def setBid(bidInfo):
 
 def trackCardPlayed(card, playerInd):
     liveCards[playerInd] = card
+    botTrackCardPlayed(card)
     removeCard(card, playerInd)
 
 def removeCard(card, playerInd):
@@ -215,17 +216,51 @@ def tryBotBidding(bidderInd):
         if (botIndex == bidderInd):
             botBidInfo = bot.tryBidding(bids, dicts["handInfo"])
             botBidInfo["currentBidder"] = botIndex
-            botBidInfo["nextBidder"] = getNextBidder(botIndex)
+            botBidInfo["nextBidder"] = getNextPlayer(botIndex)
             botBidInfo["dicts"] = dicts
 
             return botBidInfo
     
     return -1
 
-def getNextBidder(currentBidder):
-    nextBidder = currentBidder + 1
+def getNextPlayer(currentPlayer):
+    nextPlayer = currentPlayer + 1
 
-    if nextBidder > 5:
-        nextBidder = 0
+    if nextPlayer > 5:
+        nextPlayer = 0
     
-    return nextBidder
+    return nextPlayer
+
+def startHandBot():
+    global dicts
+
+    for key in botDict:
+        bot = botDict[key]:
+
+        bot.startHand(dicts["highBid"])
+
+def playBotCard(curPlayerInd):
+    global dicts
+    global cardsPlayed
+    global liveCards
+
+    for key in botDict:
+        bot = botDict[key]
+
+        botIndex = bot.getIndex()
+
+        if (botIndex == bidderInd):
+            botPlayInfo = bot.playCard(dicts["handInfo"], cardsPlayed)
+            botPlayInfo["playerPosition"] = botIndex
+            botPlayInfo["nextPlayer"] = getNextPlayer(botIndex)
+            botPlayInfo["dicts"] = dicts
+
+            return botPlayInfo
+
+    return -1
+
+def botTrackCardPlayed(card):
+    for key in botDict:
+        bot = botDict[key]
+
+        bot.recalculateCardsRemaining(card)
