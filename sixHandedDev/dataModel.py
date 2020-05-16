@@ -235,7 +235,7 @@ def startHandBot():
     global dicts
 
     for key in botDict:
-        bot = botDict[key]:
+        bot = botDict[key]
 
         bot.startHand(dicts["highBid"])
 

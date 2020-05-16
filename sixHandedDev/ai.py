@@ -247,7 +247,7 @@ class AI:
             self.initializeCardsRemainingSuit()
         
     def initializeCardsRemaining(self):
-        for suit in suits:
+        for suit in self.suits:
             self.cardsRemaining[suit] = 280
             self.highCards[suit] = suit + "14"
 
@@ -278,10 +278,53 @@ class AI:
             self.startTrickSuit()
 
     def startTrickHigh(self):
-        print("TODO")
+        bestLead = self.checkAcesNines(14)
+        if bestLead is not None:
+            return bestLead
+
+        bestLead = self.checkRunner(13, True)        
+
+    def checkAcesNines(self, bestRank):
+        for card in self.myCards:
+            rank = self.getRank(card)
+            suit = self.getSuit(card)
+
+            if rank == bestRank:
+                return card
+        
+        return None
+
+    def checkRunner(self, secondRank, isHigh):
+        for card in self.myCards:
+            rank = self.getRank(card)
+            suit = self.getSuit(card)
+
+            if self.highCards[suit] == None:
+                return self.bestOfSuit(suit, isHigh)
+            elif (self.highCards[suit] == suit + str(secondRank)) and (rank == secondRank):
+                return card
+
+    def bestOfSuit(self, checkSuit, isHigh):
+        bestCard = None
+        for card in self.myCards:
+            rank = self.getRank(card)
+            suit = self.getSuit(card)
+
+            if suit == checkSuit:
+                if bestCard == None:
+                    bestCard = card
+                elif isHigh and (rank > self.getRank(bestCard)):
+                    bestCard = card
+                elif not isHigh and (rank < self.getRank(bestCard)):
+
+        return bestCard
 
     def startTrickLow(self):
-        print("TODO")
+        bestLead = self.checkAcesNines(9)
+        if bestLead is not None:
+            return bestLead
+
+        bestLead = self.checkRunner(10, False)
 
     def startTrickSuit(self):
         print("TODO")
@@ -312,8 +355,13 @@ class AI:
 
         if rank == 14:
             self.cardsRemaining[suit] -= 100
+            if self.cardsRemaining[suit] < 100:
+                self.highCards[suit] = suit + "13"
+
         elif rank == 13:
             self.cardsRemaining[suit] -= 40
+            if self.cardsRemaining[suit] < 40:
+                self.highCards[suit] = None
 
     def recalculateLowRemaining(self, card):
         suit = self.getSuit(card)
@@ -321,8 +369,13 @@ class AI:
 
         if rank == 9:
             self.cardsRemaining[suit] -= 100
+            if self.cardsRemaining[suit] < 100:
+                self.highCards[suit] = suit + "10"
+
         elif rank == 10:
             self.cardsRemaining[suit] -= 40
+            if self.cardsRemaining[suit] < 40:
+                self.highCards[suit] = None
 
     def recalculateSuitRemaining(self, card, trump):
         suit = self.getSuit(card)
@@ -331,14 +384,28 @@ class AI:
         if suit == trump:
             if rank == 11:
                 self.cardsRemaining[trump] -= 100
+                if self.cardsRemaining[trump] < 100:
+                    self.highCards[trump] = self.getLeftBower(trump)
             else:
                 self.cardsRemaining[trump] -= 1
         
         elif self.isLeftBower(rank, suit, trump):
             self.cardsRemaining[trump] = -40
+            if self.cardsRemaining[trump] < 40:
+                self.highCards[trump] = None
 
         else:
             recalculateHighRemaining(card)
+
+    def getLeftBower(self, trump):
+        if trump == "c":
+            return "s11"
+        elif trump == "d":
+            return "h11"
+        elif trump == "h":
+            return "d11"
+        elif trump == "s":
+            return "c11"
 
     def dropHorse(self):
         print("TODO")
