@@ -263,6 +263,10 @@ class AI:
     def playCard(self, handState, cardsPlayed, trickInfo):
         cardPlayedInfo = {}
 
+        if (self.bid["high"] == "9" or self.bid["high"] == "p") and (self.bid["playerInd"] % 2 == self.getIndex() % 2) and (self.bid["playerInd"] != self.getIndex()):
+            cardPlayedInfo["cardPlayed"] = None
+            return cardPlayedInfo
+
         if cardsPlayed == 0:
             card = self.startTrick(handState)
             cardPlayedInfo["cardPlayed"] = card
@@ -395,7 +399,13 @@ class AI:
             return "c"
 
         return None
-    
+
+    def getWorstCard(self):
+        if self.bid["type"] == "low":
+            return self.getWorstCardLow()
+
+        return self.getWorstCardTrumpHigh()
+
     def getWorstCardTrumpHigh(self):
         lowCard = None
 
@@ -454,15 +464,18 @@ class AI:
             else:
                 return cardA
 
-    def getBestCardCompare(self, cardA, cardB):
-        tempCard = self.getWorseCardCompare(cardA, cardB)
+    def getBestCardCompare(self, cardA, cardB, suitLead = None):
+        tempCard = self.getWorseCardCompare(cardA, cardB, suitLead)
         if (cardA == tempCard):
             return cardB
         else:
             return cardA
     
-    def isFirstCardBetter(self, cardA, cardB):
-        betterCard = self.getBestCardCompare(cardA, cardB)
+    def isFirstCardBetter(self, cardA, cardB, suitLead = None):
+        if cardA == cardB:
+            return False
+
+        betterCard = self.getBestCardCompare(cardA, cardB, suitLead)
 
         return (betterCard == cardA)
 
@@ -484,32 +497,63 @@ class AI:
         cardToPlay = None
 
         if myTeamWinning:
-            cardToPlay = self.chooseCardWinningTrick(trickInfo)
+            cardToPlay = self.chooseCardBasedOnPlayedCards(trickInfo, False)
         else:
-            cardToPlay = self.chooseCardLosingTrick(trickInfo)
+            cardToPlay = self.chooseCardBasedOnPlayedCards(trickInfo, True)
         
         self.myCards = tempCards
         return cardToPlay
 
-    def chooseCardWinningTrick(self, trickInfo):
+    def chooseCardBasedOnPlayedCards(self, trickInfo, isLosing):
         suitLead = self.getSuitRespectingTrump(trickInfo["highCard"], self.bid["type"])
 
-        legalCards = self.getCardsOfSuit(suitLead)
-        if len(legalCards) == 0:
-            legalCards = self.myCards
+        tryTrumpIn = isLosing
+        if (self.bid["type"] == "high") or (self.bid["type"] == "low"):
+            tryTrumpIn = False
 
-        if self.highCards[suitLead] == None or trickInfo["highCard"] == self.highCards[suitLead] or self.isFirstCardBetter(trickInfo["highCard"], self.highCards[suitLead]):
-            if self.bid["type"] == "low":
-                return self.getWorstCardLow()
+        legalCards = self.getCardsOfSuit(suitLead)
+        if len(legalCards) > 0:
+            self.myCards = legalCards
+            tryTrumpIn = False
+
+        if not self.hasTrump():
+            tryTrumpIn = False
+
+        if self.highCards[suitLead] != None and (trickInfo["highCard"] == self.highCards[suitLead] or self.isFirstCardBetter(trickInfo["highCard"], self.highCards[suitLead])):
+            if not isLosing or tryTrumpIn == False:
+                return self.getWorstCard()
             else:
-                return self.getWorstCardTrumpHigh()
+                return self.tryTrumpingIn(trickInfo)
         else:
-            if self.bid["type"] == "low":
-                return self.startTrickLow()
-            elif self.bid["type"] == "high":
-                return self.startTrickHigh()
+            if tryTrumpIn:
+                return self.tryTrumpingIn(trickInfo)
+
+            cardToPlay = self.getBestCard(suitLead)
+            if self.isFirstCardBetter(cardToPlay, trickInfo["highCard"], suitLead):
+                return cardToPlay
             else:
-                return self.startTrickSuit(self.bid["type"])
+                return self.getWorstCard()
+
+    def hasTrump(self):
+        trump = self.bid["type"]
+
+        for card in self.myCards:
+            suit = self.getSuitRespectingTrump(card, trump)
+
+            if suit == trump:
+                return True
+
+        return False
+
+    def getBestCard(self, suitLead):
+        cardToPlay = None
+        for card in self.myCards:
+            if cardToPlay == None:
+                cardToPlay = card
+            elif self.isFirstCardBetter(card, cardToPlay, suitLead):
+                cardToPlay = card
+        
+        return cardToPlay
 
     def getCardsOfSuit(self, suitLead):
         legalCards = []
@@ -520,19 +564,29 @@ class AI:
 
         return legalCards
 
-    def chooseCardLosingTrick(self, trickInfo):
-        suitLead = self.getSuitRespectingTrump(trickInfo["highCard"], self.bid["type"])
+    def tryTrumpingIn(self, trickInfo):
+        cardToBeat = trickInfo["highCard"]
+        trump = self.bid["type"]
+        cardToPlay = None
 
-        legalCards = self.getCardsOfSuit(suitLead)
-        if len(legalCards) == 0:
-            legalCards = self.myCards
+        for card in self.myCards:
+            suit = self.getSuitRespectingTrump(card, trump)
 
-        if self.bid["type"] == "low":
-            return self.startTrickLow()
-        elif self.bid["type"] == "high":
-            return self.startTrickHigh()
-        else:
-            return self.startTrickSuit(self.bid["type"])
+            if suit != trump:
+                continue
+
+            if self.isFirstCardBetter(card, cardToBeat):
+                if cardToPlay == None:
+                    cardToPlay = card
+                elif self.isFirstCardBetter(cardToPlay, card):
+                    cardToPlay = card
+
+        if cardToPlay == None:
+            return self.getWorstCard()
+
+        return cardToPlay
+
+###################################################################        
 
     def recalculateCardsRemaining(self, card):
         if self.bid["type"] == "high":
@@ -548,7 +602,9 @@ class AI:
 
         if rank == 14:
             self.cardsRemaining[suit] -= 100
-            if self.cardsRemaining[suit] < 100:
+            if self.cardsRemaining[suit] < 40:
+                self.highCards[suit] = None
+            elif self.cardsRemaining[suit] < 100:
                 self.highCards[suit] = suit + "13"
 
         elif rank == 13:
@@ -562,7 +618,9 @@ class AI:
 
         if rank == 9:
             self.cardsRemaining[suit] -= 100
-            if self.cardsRemaining[suit] < 100:
+            if self.cardsRemaining[suit] < 40:
+                self.highCards[suit] = None
+            elif self.cardsRemaining[suit] < 100:
                 self.highCards[suit] = suit + "10"
 
         elif rank == 10:
@@ -577,18 +635,25 @@ class AI:
         if suit == trump:
             if rank == 11:
                 self.cardsRemaining[trump] -= 100
-                if self.cardsRemaining[trump] < 100:
-                    self.highCards[trump] = self.getLeftBower(trump)
-            else:
-                self.cardsRemaining[trump] -= 1
+            elif rank == 14:
+                self.cardsRemaining[trump] -= 5
+
+            self.setHighCardTrump(trump)
         
         elif self.isLeftBower(rank, suit, trump):
-            self.cardsRemaining[trump] = -40
-            if self.cardsRemaining[trump] < 40:
-                self.highCards[trump] = None
+            self.cardsRemaining[trump] -= 40
+            self.setHighCardTrump(trump)
 
         else:
             self.recalculateHighRemaining(card)
+
+    def setHighCardTrump(self, trump):
+        if self.cardsRemaining[trump] <= 0:
+            self.highCards[trump] = None
+        elif self.cardsRemaining[trump] < 40:
+            self.highCards[trump] = trump + "14"
+        elif self.cardsRemaining[trump] < 100:
+            self.highCards[trump] = self.getLeftBower(trump)
 
     def getLeftBower(self, trump):
         if trump == "c":

@@ -259,6 +259,21 @@ def playBotCard(curPlayerInd):
 
     return -1
 
+def tryBotPassing(passerInd):
+    global dicts
+
+    for key in botDict:
+        bot = botDict[key]
+
+        botIndex = bot.getIndex()
+
+        if botIndex == passerInd:
+            botPassInfo = bot.passHorse()
+
+            return botPassInfo
+
+    return -1
+
 def botTrackCardPlayed(card):
     for key in botDict:
         bot = botDict[key]

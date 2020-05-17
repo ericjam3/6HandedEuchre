@@ -43,7 +43,7 @@ def checkBid(botBid, expectedType, expectedNumber, testNumber):
 def testLeading1():
     bot = AI("bot", 0, 5)
 
-    bot.dealCards(["c13", "s11", "c11", "c11", "d11", "d14", "s14", "h9"])
+    bot.dealCards(["c10", "s11", "c11", "d10", "s12", "s13", "h11"])
     bot.startHand({"type": "c"})
     botPlay = bot.playCard({}, 0, {})
 

@@ -93,18 +93,16 @@ def submitBid(json):
         
         json = {"dicts": dataModel.dicts}
 
+        dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
+        dataModel.startHandBot()
+
         if int(dataModel.dicts["highBid"]["high"]) == 9:
             dataModel.currentStage = "dropHorse"
-            dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
-
             socketio.emit('horse drop', json)
             return
 
         dataModel.currentStage = "playCards"
-        dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
-
         socketio.emit('done bidding', json)
-        dataModel.startHandBot()
         tryBotPlaying(dataModel.getCurrentPlayer())
     else:
         json["dicts"] = dataModel.dicts
@@ -442,7 +440,15 @@ def handle_done_drop_horse(json, methods=['GET', 'POST']):
         dataModel.setCurrentPlayer(json["dropper"])
 
         socketio.emit('pass horse', json)
+        tryBotPassHorse(dataModel.getCurrentPlayer())
 
+def tryBotPassHorse(passerInd):
+    botPassInfo = dataModel.tryBotPassing(passerInd)
+    if botPassInfo == -1:
+        return
+
+    socketio.sleep(1)
+    # submitBid(botPassInfo)
 
 @socketio.on('end game')
 def handle_end_game(methods=['GET', 'POST']):
