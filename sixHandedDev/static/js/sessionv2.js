@@ -48,6 +48,7 @@ function showBotScreen(){
 }
 
 function hideBotScreen(){
+    $("#botName").val("");
     $("#botForm").hide();
     $("#signinScreen").show();
     $("#roomLink").show();

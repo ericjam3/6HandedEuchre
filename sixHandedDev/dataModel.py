@@ -249,7 +249,7 @@ def playBotCard(curPlayerInd):
 
         botIndex = bot.getIndex()
 
-        if (botIndex == bidderInd):
+        if (botIndex == curPlayerInd):
             botPlayInfo = bot.playCard(dicts["handInfo"], cardsPlayed, dicts["trickInfo"])
             botPlayInfo["playerPosition"] = botIndex
             botPlayInfo["nextPlayer"] = getNextPlayer(botIndex)

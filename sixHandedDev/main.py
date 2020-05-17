@@ -73,6 +73,8 @@ def tryBotBidding(bidderInd):
 
 def tryBotPlaying(curPlayerInd):
     botPlayInfo = dataModel.playBotCard(curPlayerInd)
+    if botPlayInfo == -1:
+        return
 
     socketio.sleep(1)
     playCard(botPlayInfo)
@@ -154,6 +156,8 @@ def playCard(json):
 
     if dataModel.cardsPlayed > 5:
         handleEndOfTrick()
+    else:
+        tryBotPlaying(dataModel.getCurrentPlayer())
 
 def trackWhoWinningTrick(playInfo):
     if "suitLead" in playInfo:
@@ -310,7 +314,7 @@ def startAnotherTrick():
 
     socketio.sleep(3)
     socketio.emit('new trick', currentHandInfo)
-
+    tryBotPlaying(dataModel.getCurrentPlayer())
 
 def beginNewHand():
     dataModel.dicts["handInfo"]["handsLeft"] -= 1

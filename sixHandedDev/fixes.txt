@@ -1,1 +1,1 @@
-* Need to check player index when reconnecting if current stage is pass horse
+* Make it so that AI does not huck cards that create singleton Aces

@@ -1,6 +1,6 @@
 from ai import AI
 
-def test1():
+def testBidding1():
     bot = AI("bot", 0, 5)
 
     bot.dealCards(["c9", "c9", "c10", "c14", "d9", "s9", "s9", "h11"])
@@ -8,7 +8,7 @@ def test1():
     
     checkBid(botBid, "low", "6", "1")
 
-def test2():
+def testBidding2():
     bot = AI("bot", 0, 5)
 
     bot.dealCards(["c14", "c14", "c13", "c9", "d14", "s14", "s14", "h11"])
@@ -16,7 +16,7 @@ def test2():
     
     checkBid(botBid, "high", "6", "2")
 
-def test3():
+def testBidding3():
     bot = AI("bot", 0, 5)
 
     bot.dealCards(["c14", "c14", "c13", "c9", "d11", "d11", "h11", "d13"])
@@ -24,7 +24,7 @@ def test3():
     
     checkBid(botBid, "d", "5", "3")
 
-def test4():
+def testBidding4():
     bot = AI("bot", 0, 5)
 
     bot.dealCards(["c13", "s11", "c11", "c11", "d11", "d14", "s14", "h9"])
@@ -38,9 +38,27 @@ def checkBid(botBid, expectedType, expectedNumber, testNumber):
     assert botBid["bidNumber"] == expectedNumber, "Test " + testNumber + ": bid number should be " + expectedNumber + " not " + botBid["bidNumber"]
 
 
+#######################################################################
+
+def testLeading1():
+    bot = AI("bot", 0, 5)
+
+    bot.dealCards(["c13", "s11", "c11", "c11", "d11", "d14", "s14", "h9"])
+    bot.startHand({"type": "c"})
+    botPlay = bot.playCard({}, 0, {})
+
+    checkPlay(botPlay["cardPlayed"], "c11", "1")
+    checkPlay(botPlay["cardPlayed"], "c11", "1")
+    checkPlay(botPlay["cardPlayed"], "s11", "1")
+
+
+def checkPlay(botPlay, expectedCard, testNumber):
+    assert botPlay == expectedCard, "Test " + testNumber + ": Should have led " + expectedCard + " not " + botPlay
 
 if __name__ == '__main__':
-    test1()
-    test2()
-    test3()
-    test4()
+    testBidding1()
+    testBidding2()
+    testBidding3()
+    testBidding4()
+
+    testLeading1()
