@@ -505,7 +505,7 @@ class AI:
         return cardToPlay
 
     def chooseCardBasedOnPlayedCards(self, trickInfo, isLosing):
-        suitLead = self.getSuitRespectingTrump(trickInfo["highCard"], self.bid["type"])
+        suitLead = trickInfo["suitLead"]
 
         tryTrumpIn = isLosing
         if (self.bid["type"] == "high") or (self.bid["type"] == "low"):
