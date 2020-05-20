@@ -46,15 +46,18 @@ class AI:
             highestBidNumber = lowBid
 
         highestBidNumber = self.trueRound(highestBidNumber)
-        return {"bidNumber": self.finalBidNumber(bidsList, highestBidNumber), "bidType": highestBidType}
+        return {"bidNumber": self.finalBidNumber(bidsList, highestBidNumber, gameState), "bidType": highestBidType}
 
-    def finalBidNumber(self, bidsList, highestBidNumber):
+    def finalBidNumber(self, bidsList, highestBidNumber, gameState):
         for bid in bidsList:
             if bid is None:
                 continue
 
             if int(bid["bidNumber"]) >= highestBidNumber:
                 return "0"
+
+        if highestBidNumber > 7:
+            return "9"
             
         return str(int(highestBidNumber))
 
@@ -263,7 +266,7 @@ class AI:
     def playCard(self, handState, cardsPlayed, trickInfo):
         cardPlayedInfo = {}
 
-        if (self.bid["high"] == "9" or self.bid["high"] == "p") and (self.bid["playerInd"] % 2 == self.getIndex() % 2) and (self.bid["playerInd"] != self.getIndex()):
+        if (self.bid["high"] == "9" or self.bid["high"] == "10") and ((self.bid["playerInd"] % 2) == (self.getIndex() % 2)) and (self.bid["playerInd"] != self.getIndex()):
             cardPlayedInfo["cardPlayed"] = None
             return cardPlayedInfo
 
@@ -545,7 +548,7 @@ class AI:
 
         return False
 
-    def getBestCard(self, suitLead):
+    def getBestCard(self, suitLead = None):
         cardToPlay = None
         for card in self.myCards:
             if cardToPlay == None:
@@ -668,10 +671,30 @@ class AI:
         return None
 
     def dropHorse(self):
+        if self.bidIsSuit(self.bid["type"]):
+            self.removePlayedCard(self.getWorstCard())
+            self.removePlayedCard(self.getWorstCard())
+        elif self.bid["type"] == "high":
+            self.dropHighHorse()
+        else:
+            self.dropLowHorse()
+        
+        return self.myCards()
+
+    def bidIsSuit(self, bidType):
+        if bidType == "low" or bidType == "high":
+            return False
+
+        return True
+
+    def dropHighHorse(self):
+        print("TODO")
+
+    def dropLowHorse(self):
         print("TODO")
 
     def passHorse(self):
-        print("TODO")
+        return self.getBestCard()
 
     def trueRound(self, number):
         if (number % 1) > .5:

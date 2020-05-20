@@ -259,8 +259,16 @@ def playBotCard(curPlayerInd):
 
     return -1
 
-def tryBotPassing(passerInd):
+def botTrackCardPlayed(card):
+    for key in botDict:
+        bot = botDict[key]
+
+        bot.recalculateCardsRemaining(card)
+
+def tryBotPassing(offset, bidderInd):
     global dicts
+
+    passerInd = getPlayerIndBasedOnOffset(offset, bidderInd)
 
     for key in botDict:
         bot = botDict[key]
@@ -268,14 +276,31 @@ def tryBotPassing(passerInd):
         botIndex = bot.getIndex()
 
         if botIndex == passerInd:
-            botPassInfo = bot.passHorse()
+            botPassedCard = bot.passHorse()
 
-            return botPassInfo
+            return botPassedCard
 
     return -1
 
-def botTrackCardPlayed(card):
+def getPlayerIndBasedOnOffset(offset, bidderInd):
+    pind = bidderInd + offset
+
+    if pind > 5:
+        pind = pind - 6
+
+    return pind
+
+def botHorseDrop(playerInd):
+    global dicts
+
     for key in botDict:
         bot = botDict[key]
 
-        bot.recalculateCardsRemaining(card)
+        botIndex = bot.getIndex()
+
+        if botIndex == playerInd:
+            botDropInfo = bot.dropHorse()
+
+            return botDropInfo
+
+    return -1
