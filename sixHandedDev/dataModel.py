@@ -50,7 +50,8 @@ def trackCardPlayed(card, playerInd):
     removeCard(card, playerInd)
 
 def removeCard(card, playerInd):
-    playersHands[playerInd].remove(card)
+    if players[playerInd] not in botDict:
+        playersHands[playerInd].remove(card)
 
 def getState(playerInd):
     state = {}
@@ -77,7 +78,6 @@ def updateHandAfterHorsePass(newCard):
     global playersHands
 
     playersHands[dicts["highBid"]["playerInd"]].append(newCard)
-
 
 
 ##########################################################
@@ -300,6 +300,8 @@ def botHorseDrop(playerInd):
 
         if botIndex == playerInd:
             botDropInfo = bot.dropHorse()
+            botDropInfo["done"] = 1
+            botDropInfo["dicts"] = dicts
 
             return botDropInfo
 

@@ -446,6 +446,7 @@ def submitHorseDropPass(json):
         dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
 
         socketio.emit('done bidding', json)
+        tryBotPlaying(dataModel.getCurrentPlayer())
     else:
         dataModel.currentStage = "passHorse"
         dataModel.setCurrentPlayer(json["dropper"])
