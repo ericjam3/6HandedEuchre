@@ -14,6 +14,14 @@ cp sixHandedDev/dataModel.py sixHanded5/dataModel.py
 cp sixHandedDev/dataModel.py sixHanded6/dataModel.py
 cp sixHandedDev/dataModel.py sixHanded7/dataModel.py
 cp sixHandedDev/dataModel.py sixHanded8/dataModel.py
+cp sixHandedDev/ai.py sixHanded/ai.py
+cp sixHandedDev/ai.py sixHanded2/ai.py
+cp sixHandedDev/ai.py sixHanded3/ai.py
+cp sixHandedDev/ai.py sixHanded4/ai.py
+cp sixHandedDev/ai.py sixHanded5/ai.py
+cp sixHandedDev/ai.py sixHanded6/ai.py
+cp sixHandedDev/ai.py sixHanded7/ai.py
+cp sixHandedDev/ai.py sixHanded8/ai.py
 cp sixHandedDev/static/css/session.css sixHanded/static/css/session.css
 cp sixHandedDev/static/css/session.css sixHanded2/static/css/session.css
 cp sixHandedDev/static/css/session.css sixHanded3/static/css/session.css

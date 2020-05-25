@@ -22,19 +22,52 @@ socket.on( 'connect', function() {
     } )
 
     setupUI();
-
-    var form = $( '#signin' ).on( 'submit', function( e ) {
-        e.preventDefault();
-        username = $( '#username' ).val();
-        sessionStorage.setItem("username", username);
-
-        socket.emit( 'signin', {
-            user_name : username
-        } )
-
-        setUIToWaiting();
-    } )
 } )
+
+function submitName(){
+    username = $( '#username' ).val();
+    sessionStorage.setItem("username", username);
+
+    socket.emit( 'signin', {
+        user_name : username
+    } )
+
+    setUIToWaiting();
+}
+
+function addBot(){
+    showBotScreen();
+}
+
+function showBotScreen(){
+    $("#botForm").show();
+    $("#signinScreen").hide();
+    $("#roomLink").hide();
+    
+    $("#botName").focus();
+}
+
+function hideBotScreen(){
+    $("#botName").val("");
+    $("#botForm").hide();
+    $("#signinScreen").show();
+    $("#roomLink").show();
+}
+
+function submitBot(){
+    let botName = $("#botName").val();
+
+    if (botName){
+        addBotPlayer(botName);
+        hideBotScreen();
+    }
+}
+
+function addBotPlayer(botName){
+    socket.emit('add bot', {
+        botName: botName
+    })
+}
 
 socket.on('reconnection', function(data){
     if (data.user == username){
@@ -177,6 +210,16 @@ function checkIfLeading(cardsPlayed){
 
     return false;
 }
+
+$(document).ready(function(){
+    let usernameInput = document.getElementById("username");
+
+    usernameInput.addEventListener("keyup", function(event){
+        if (event.keyCode === 13){
+            submitName();
+        }
+    });
+});
 
 //////////////////////////////////////////////////////////
 

@@ -152,18 +152,18 @@ body {
     display: none;
 }
 
-#username {
+.username {
     padding: 8px 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
 }
 
-#username:focus {
+.username:focus {
     box-shadow: 0 0 7px rgb(69, 175, 204);
     outline: none;
 }
 
-.submit, .endGame {
+.submit, .endGame, .neutral {
     border-radius: 3px;
     padding: 5px;
     font-weight: bold;
@@ -188,6 +188,16 @@ body {
 
 .endGame:hover:enabled {
     background-color: rgb(135, 0, 0);
+    color: white;
+}
+
+.neutral {
+    border: 1px solid rgb(160, 111, 3);
+    background-color: rgb(247, 242, 113);
+}
+
+.neutral:hover:enabled {
+    background-color: rgb(160, 111, 3);
     color: white;
 }
 
@@ -352,4 +362,21 @@ img {
     display: none;
     font-size: 26px;
     font-weight: bold;
+}
+
+#botForm {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#botForm input {
+    margin: 5px;
 }

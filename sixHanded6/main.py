@@ -37,26 +37,53 @@ def handle_signin(json, methods=['GET', 'POST']):
     if (len(dataModel.players) < dataModel.numPlayers) and (json['user_name'] not in dataModel.players):
         dataModel.addPlayer(json['user_name'])
         socketio.emit('playersIn', {"players": dataModel.players})
-
-        print(json['user_name'])
-
-        # Everyone is signed in now
-        if len(dataModel.players) == dataModel.numPlayers:
-            socketio.emit('begin', dataModel.players)
-
-            dataModel.setInitialGameInfo()
-            dealCards()
+        tryStartingGame()
     
     elif (json['user_name'] in dataModel.players):
         reconnectPlayer(json['user_name'])
+
+@socketio.on('add bot')
+def handle_add_bot(json, methods=['GET', 'POST']):
+    if (len(dataModel.players) < dataModel.numPlayers) and (json['botName'] not in dataModel.players):
+        dataModel.addBot(json['botName'], len(dataModel.players))
+        socketio.emit('playersIn', {"players": dataModel.players})
+        tryStartingGame()
+
+def tryStartingGame():
+    if len(dataModel.players) == dataModel.numPlayers:
+        socketio.emit('begin', dataModel.players)
+
+        dataModel.setInitialGameInfo()
+        dealCards()
 
 def dealCards():
     dataModel.currentStage = "bidding"
     deck = dataModel.getShuffledDeck()
     socketio.emit('deal', {"deck": deck, "dicts": dataModel.dicts})
+    dataModel.dealCardsToBots(deck)
+    tryBotBidding(dataModel.dicts["handInfo"]["dealer"])
+
+def tryBotBidding(bidderInd):
+    botBidInfo = dataModel.tryBotBidding(bidderInd)
+    if botBidInfo == -1:
+        return
+
+    socketio.sleep(1)
+    submitBid(botBidInfo)
+
+def tryBotPlaying(curPlayerInd):
+    botPlayInfo = dataModel.playBotCard(curPlayerInd)
+    if botPlayInfo == -1:
+        return
+
+    socketio.sleep(1)
+    playCard(botPlayInfo)
 
 @socketio.on('submit bid')
 def handle_submit_bid(json, methods=['GET', 'POST']):
+    submitBid(json)    
+
+def submitBid(json):
     determineHighBid(json)
 
     dataModel.setBid(json)
@@ -66,22 +93,32 @@ def handle_submit_bid(json, methods=['GET', 'POST']):
         
         json = {"dicts": dataModel.dicts}
 
+        dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
+        dataModel.startHandBot()
+
         if int(dataModel.dicts["highBid"]["high"]) == 9:
             dataModel.currentStage = "dropHorse"
-            dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
-
             socketio.emit('horse drop', json)
+            tryBotHorseDrop(dataModel.getCurrentPlayer())
             return
 
         dataModel.currentStage = "playCards"
-        dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
-
-        socketio.emit('done bidding', json)  
+        socketio.emit('done bidding', json)
+        tryBotPlaying(dataModel.getCurrentPlayer())
     else:
         json["dicts"] = dataModel.dicts
         dataModel.setCurrentPlayer(json["nextBidder"])
 
         socketio.emit('bid placed', json)
+        tryBotBidding(dataModel.getCurrentPlayer())
+
+def tryBotHorseDrop(playerInd):
+    botHorseDropInfo = dataModel.botHorseDrop(playerInd)
+    if botHorseDropInfo == -1:
+        return
+
+    socketio.sleep(1)
+    submitHorseDropPass(botHorseDropInfo)
 
 # Determine who has the highest bid and what it is
 def determineHighBid(bidInfo):
@@ -105,6 +142,9 @@ def determineHighBid(bidInfo):
 # Play a card
 @socketio.on('play card')
 def handle_card_played(json, methods=['GET', 'POST']):
+    playCard(json)
+
+def playCard(json):
     if json["cardPlayed"]:
         trackWhoWinningTrick(json)
 
@@ -123,6 +163,8 @@ def handle_card_played(json, methods=['GET', 'POST']):
 
     if dataModel.cardsPlayed > 5:
         handleEndOfTrick()
+    else:
+        tryBotPlaying(dataModel.getCurrentPlayer())
 
 def trackWhoWinningTrick(playInfo):
     if "suitLead" in playInfo:
@@ -279,7 +321,7 @@ def startAnotherTrick():
 
     socketio.sleep(3)
     socketio.emit('new trick', currentHandInfo)
-
+    tryBotPlaying(dataModel.getCurrentPlayer())
 
 def beginNewHand():
     dataModel.dicts["handInfo"]["handsLeft"] -= 1
@@ -383,7 +425,9 @@ def emailScores():
 
 @socketio.on('done drop horse')
 def handle_done_drop_horse(json, methods=['GET', 'POST']):
-    # Save stuff for people who disconnect
+    submitHorseDropPass(json)
+
+def submitHorseDropPass(json):
     if "done" in json:
         dataModel.updateHandAfterHorseDrop(json["myCardsHorse"])
     else:
@@ -402,12 +446,23 @@ def handle_done_drop_horse(json, methods=['GET', 'POST']):
         dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
 
         socketio.emit('done bidding', json)
+        tryBotPlaying(dataModel.getCurrentPlayer())
     else:
         dataModel.currentStage = "passHorse"
         dataModel.setCurrentPlayer(json["dropper"])
 
         socketio.emit('pass horse', json)
+        tryBotPassHorse(dataModel.getCurrentPlayer(), dataModel.dicts["highBid"]["playerInd"], json["passedCards"])
 
+def tryBotPassHorse(offset, bidderInd, passedCards):
+    botPassedCard = dataModel.tryBotPassing(offset, bidderInd)
+    if botPassedCard == -1:
+        return
+
+    socketio.sleep(1)
+    passedCards.append(botPassedCard)
+    botPassInfo = {"singlePassedCard": botPassedCard, "passedCards": passedCards, "dicts": dataModel.dicts}
+    submitHorseDropPass(botPassInfo)
 
 @socketio.on('end game')
 def handle_end_game(methods=['GET', 'POST']):

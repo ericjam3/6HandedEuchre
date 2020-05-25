@@ -1,12 +1,14 @@
 # Now synced with Dev using ./copyFiles from 6HandedEuchre directory
 
 import random
+from ai import AI
 
 # Global variables
 players = []
 numPlayers = 6
 cardsPlayed = 0
 currentDeck = []
+botDict = {}
 dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}
 
 # Info needed for when a player reconnects
@@ -36,15 +38,20 @@ def setCurrentPlayer(player):
     global playerTurn
     playerTurn = player
 
+def getCurrentPlayer():
+    return playerTurn
+
 def setBid(bidInfo):
     bids[bidInfo["currentBidder"]] = {"bidNumber": bidInfo["bidNumber"], "bidType": bidInfo["bidType"]}
 
 def trackCardPlayed(card, playerInd):
     liveCards[playerInd] = card
+    botTrackCardPlayed(card)
     removeCard(card, playerInd)
 
 def removeCard(card, playerInd):
-    playersHands[playerInd].remove(card)
+    if players[playerInd] not in botDict:
+        playersHands[playerInd].remove(card)
 
 def getState(playerInd):
     state = {}
@@ -73,7 +80,6 @@ def updateHandAfterHorsePass(newCard):
     playersHands[dicts["highBid"]["playerInd"]].append(newCard)
 
 
-
 ##########################################################
 
 def changeDealer():
@@ -93,8 +99,10 @@ def resetGame():
     global passedCards
     global cardsPlayed
     global currentDeck
+    global botDict
 
     dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}
+    botDict = {}
     players = []
 
     currentStage = "signIn"
@@ -174,3 +182,127 @@ def startNewTrick():
 
 def getTrump():
     return dicts["highBid"]["type"]
+
+###############################################################
+
+def addBot(name, index):
+    global botDict
+
+    addPlayer(name)
+    botDict[name] = AI(name, index, 5)
+
+def dealCardsToBots(deck):
+    global botDict
+    global dicts
+
+    for key in botDict:
+        bot = botDict[key]
+
+        botIndex = bot.getIndex()
+        startCard = botIndex * 8
+        stopCard = startCard + 8
+
+        bot.dealCards(deck[startCard:stopCard])
+
+def tryBotBidding(bidderInd):
+    global dicts
+    global bids
+
+    for key in botDict:
+        bot = botDict[key]
+
+        botIndex = bot.getIndex()
+
+        if (botIndex == bidderInd):
+            botBidInfo = bot.tryBidding(bids, dicts["handInfo"])
+            botBidInfo["currentBidder"] = botIndex
+            botBidInfo["nextBidder"] = getNextPlayer(botIndex)
+            botBidInfo["dicts"] = dicts
+
+            return botBidInfo
+    
+    return -1
+
+def getNextPlayer(currentPlayer):
+    nextPlayer = currentPlayer + 1
+
+    if nextPlayer > 5:
+        nextPlayer = 0
+    
+    return nextPlayer
+
+def startHandBot():
+    global dicts
+
+    for key in botDict:
+        bot = botDict[key]
+
+        bot.startHand(dicts["highBid"])
+
+def playBotCard(curPlayerInd):
+    global dicts
+    global cardsPlayed
+    global liveCards
+
+    for key in botDict:
+        bot = botDict[key]
+
+        botIndex = bot.getIndex()
+
+        if (botIndex == curPlayerInd):
+            botPlayInfo = bot.playCard(dicts["handInfo"], cardsPlayed, dicts["trickInfo"])
+            botPlayInfo["playerPosition"] = botIndex
+            botPlayInfo["nextPlayer"] = getNextPlayer(botIndex)
+            botPlayInfo["dicts"] = dicts
+
+            return botPlayInfo
+
+    return -1
+
+def botTrackCardPlayed(card):
+    for key in botDict:
+        bot = botDict[key]
+
+        bot.recalculateCardsRemaining(card)
+
+def tryBotPassing(offset, bidderInd):
+    global dicts
+
+    passerInd = getPlayerIndBasedOnOffset(offset, bidderInd)
+
+    for key in botDict:
+        bot = botDict[key]
+
+        botIndex = bot.getIndex()
+
+        if botIndex == passerInd:
+            botPassedCard = bot.passHorse()
+
+            return botPassedCard
+
+    return -1
+
+def getPlayerIndBasedOnOffset(offset, bidderInd):
+    pind = bidderInd + offset
+
+    if pind > 5:
+        pind = pind - 6
+
+    return pind
+
+def botHorseDrop(playerInd):
+    global dicts
+
+    for key in botDict:
+        bot = botDict[key]
+
+        botIndex = bot.getIndex()
+
+        if botIndex == playerInd:
+            botDropInfo = bot.dropHorse()
+            botDropInfo["done"] = 1
+            botDropInfo["dicts"] = dicts
+
+            return botDropInfo
+
+    return -1
