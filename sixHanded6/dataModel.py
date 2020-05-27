@@ -7,6 +7,7 @@ from ai import AI
 players = []
 numPlayers = 6
 cardsPlayed = 0
+prevCardWasNone = False
 currentDeck = []
 botDict = {}
 dicts = {"highBid": {}, "handInfo": {}, "trickInfo": {}}

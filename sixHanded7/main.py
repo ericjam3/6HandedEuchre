@@ -145,11 +145,18 @@ def handle_card_played(json, methods=['GET', 'POST']):
     playCard(json)
 
 def playCard(json):
+    # Should allow for safe spectating
+    if dataModel.prevCardWasNone and json["cardPlayed"] is None:
+        return
+
     if json["cardPlayed"]:
         trackWhoWinningTrick(json)
 
     if json["cardPlayed"] is not None:
         dataModel.trackCardPlayed(json["cardPlayed"], json["playerPosition"])
+        dataModel.prevCardWasNone = False
+    else:
+        dataModel.prevCardWasNone = True
 
     updateTrickInfo()
     dataModel.dicts["trickInfo"]["cardsPlayed"] = dataModel.cardsPlayed

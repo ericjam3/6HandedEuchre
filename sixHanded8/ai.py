@@ -56,13 +56,16 @@ class AI:
             highestBidNumber = lowBid
 
         highestBidNumber = self.trueRound(highestBidNumber)
-        return {"bidNumber": self.finalBidNumber(bidsList, highestBidNumber, gameState), "bidType": highestBidType}
+        return {"bidNumber": self.finalBidNumber(bidsList, highestBidNumber, highestBidType, gameState), "bidType": highestBidType}
 
-    def finalBidNumber(self, bidsList, highestBidNumber, gameState):
+    def finalBidNumber(self, bidsList, myBidNumber, myBidType, gameState):
         highestPrevBid = None
+        highestBidderInd = None
+        highestBidType = None
         numBids = 0
+        counter = 0
 
-        if highestBidNumber > 9:
+        if myBidNumber > 9:
             return "p"
 
         for bid in bidsList:
@@ -71,18 +74,27 @@ class AI:
             
             numBids += 1
 
-            if int(bid["bidNumber"]) >= highestBidNumber:
+            if int(bid["bidNumber"]) >= myBidNumber:
                 return "0"
 
             if highestPrevBid == None:
                 highestPrevBid = int(bid["bidNumber"])
+                highestBidderInd = counter
+                highestBidType = bid["bidType"]
             elif int(bid["bidNumber"]) > highestPrevBid:
                 highestPrevBid = int(bid["bidNumber"])
-    
-        if numBids == 5 and highestBidNumber < 9:
-            highestBidNumber = highestPrevBid + 1
+                highestBidderInd = counter
+                highestBidType = bid["bidType"]
 
-        return str(int(highestBidNumber))
+            counter += 1
+
+        if numBids == 5 and myBidNumber < 9:
+            if (highestBidderInd % 2 == self.getIndex() % 2) and (myBidType == highestBidType):
+                return "0"
+            else:
+                myBidNumber = highestPrevBid + 1
+
+        return str(int(myBidNumber))
 
     def calcHighBid(self, bidsList, gameState):
         howManyOfEachSuit = {"c": 0, "d": 0, "h": 0, "s": 0}
@@ -102,7 +114,12 @@ class AI:
                 points[suit] += 1
 
         estimatedTricks = self.getEstimatedTricksHighLow(points, howManyOfEachSuit, bidsList)
-        shouldHorse = self.checkForHighLowHorse(estimatedTricks)
+
+        shouldPepper = self.checkForHighLowPepper(estimatedTricks, bidsList)
+        if shouldPepper:
+            return 10
+
+        shouldHorse = self.checkForHighLowHorse(estimatedTricks, bidsList)
         if shouldHorse:
             return 9
             
@@ -167,8 +184,22 @@ class AI:
 
         return estimatedTricks
 
-    def checkForHighLowHorse(self, estimatedTricks):
+    def checkForHighLowHorse(self, estimatedTricks, bidsList):
         if estimatedTricks >= 5.5 and self.pointSpread < -14:
+            return True
+        elif estimatedTricks >= 5 and self.handsLeft == 1 and self.pointSpread < -8:
+            return True
+        elif estimatedTricks >= 3.5 and self.handsLeft == 1 and self.pointSpread < -8 and self.howManyPreviousBidders(bidsList) >= 4:
+            return True
+        
+        return False
+
+    def checkForHighLowPepper(self, estimatedTricks, bidsList):
+        if estimatedTricks >= 6.5 and self.pointSpread < -29:
+            return True
+        elif estimatedTricks >= 6 and self.handsLeft == 1 and self.pointSpread < -15:
+            return True
+        elif estimatedTricks >= 4.5 and self.handsLeft == 1 and self.pointSpread < -15 and self.howManyPreviousBidders(bidsList) >= 4:
             return True
         
         return False
@@ -206,7 +237,12 @@ class AI:
                 points[suit] += 1
 
         estimatedTricks = self.getEstimatedTricksHighLow(points, howManyOfEachSuit, bidsList)
-        shouldHorse = self.checkForHighLowHorse(estimatedTricks)
+
+        shouldPepper = self.checkForHighLowPepper(estimatedTricks, bidsList)
+        if shouldPepper:
+            return 10
+
+        shouldHorse = self.checkForHighLowHorse(estimatedTricks, bidsList)
         if shouldHorse:
             return 9
             
@@ -238,7 +274,12 @@ class AI:
                 howManyOffSuitAces += 1
 
         estimatedTricks = self.calcSuitPoints(points, howManyTrump, howManyOffSuitAces)
-        shouldHorse = self.checkForSuitHorse(estimatedTricks, trump, points)
+
+        shouldPepper = self.checkForSuitPepper(estimatedTricks, trump, points, bidsList)
+        if shouldPepper:
+            return 10
+
+        shouldHorse = self.checkForSuitHorse(estimatedTricks, trump, points, bidsList)
         if shouldHorse:
             return 9
 
@@ -264,7 +305,7 @@ class AI:
 
         return estimatedTricks
 
-    def checkForSuitHorse(self, estimatedTricks, trump, points):
+    def checkForSuitHorse(self, estimatedTricks, trump, points, bidsList):
         numLosers = self.getNumLosers(trump)
 
         if self.pointSpread < -24 and estimatedTricks > 4 and numLosers < 4:
@@ -274,6 +315,28 @@ class AI:
         elif estimatedTricks >= 5.5 and numLosers < 3 and points >= 240:
             return True
         elif estimatedTricks >= 5.5 and numLosers < 3 and points > 202:
+            return True
+        elif estimatedTricks >= 5 and numLosers < 4 and self.pointSpread < -8 and self.handsLeft == 1:
+            return True
+        elif estimatedTricks >= 4 and numLosers < 5 and self.handsLeft == 1 and self.pointSpread < -8 and self.howManyPreviousBidders(bidsList) >= 4:
+            return True
+
+        return False
+
+    def checkForSuitPepper(self, estimatedTricks, trump, points, bidsList):
+        numLosers = self.getNumLosers(trump)
+
+        if self.pointSpread < -35 and estimatedTricks > 6 and numLosers < 2:
+            return True
+        elif self.pointSpread < -20 and estimatedTricks > 6.5 and numLosers == 0:
+            return True
+        elif estimatedTricks >= 7 and numLosers == 0 and points >= 240:
+            return True
+        elif estimatedTricks >= 7 and numLosers == 0 and points > 202:
+            return True
+        elif estimatedTricks >= 5 and numLosers < 3 and self.pointSpread < -15 and self.handsLeft == 1:
+            return True
+        elif estimatedTricks >= 4 and numLosers < 4 and self.handsLeft == 1 and self.pointSpread < -15 and self.howManyPreviousBidders(bidsList) >= 4:
             return True
 
         return False
@@ -399,8 +462,8 @@ class AI:
                 return self.bestOfSuit(suit, isHigh)
             elif (self.highCards[suit] == suit + str(secondRank)) and (rank == secondRank):
                 return card
-            else:
-                return None
+
+        return None
 
     def bestOfSuit(self, checkSuit, isHigh):
         bestCard = None
