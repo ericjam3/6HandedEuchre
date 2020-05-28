@@ -31,6 +31,17 @@ def testBidding4():
     botBid = bot.tryBidding([], {})
     
     checkBid(botBid, "c", "5", "4")
+
+def testBidding5():
+    bot = AI("bot", 1, 5)
+
+    bot.dealCards(["c13", "s11", "c11", "c11", "d11", "d14", "s14", "h9"])
+    botBid = bot.finalBidNumber([{'bidNumber': '3', 'bidType': 'c'}, \
+    None, {'bidNumber': '0', 'bidType': 'c'}, \
+    {'bidNumber': '5', 'bidType': 'c'}, {'bidNumber': '1', 'bidType': 'low'}, \
+    {'bidNumber': '2', 'bidType': 'low'}], 7, "c", {})
+
+    print(botBid)
     
 
 def checkBid(botBid, expectedType, expectedNumber, testNumber):
@@ -56,9 +67,10 @@ def checkPlay(botPlay, expectedCard, testNumber):
     assert botPlay == expectedCard, "Test " + testNumber + ": Should have led " + expectedCard + " not " + botPlay
 
 if __name__ == '__main__':
-    testBidding1()
-    testBidding2()
-    testBidding3()
-    testBidding4()
+    # testBidding1()
+    # testBidding2()
+    # testBidding3()
+    # testBidding4()
+    testBidding5()
 
-    testLeading1()
+    # testLeading1()
