@@ -69,6 +69,7 @@ class AI:
             return "p"
 
         for bid in bidsList:
+            counter += 1
             if bid is None:
                 continue
             
@@ -79,14 +80,12 @@ class AI:
 
             if highestPrevBid == None:
                 highestPrevBid = int(bid["bidNumber"])
-                highestBidderInd = counter
+                highestBidderInd = counter - 1
                 highestBidType = bid["bidType"]
             elif int(bid["bidNumber"]) > highestPrevBid:
                 highestPrevBid = int(bid["bidNumber"])
-                highestBidderInd = counter
+                highestBidderInd = counter - 1
                 highestBidType = bid["bidType"]
-
-            counter += 1
 
         if numBids == 5 and myBidNumber < 9:
             if (highestBidderInd % 2 == self.getIndex() % 2) and (myBidType == highestBidType):
