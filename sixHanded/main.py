@@ -480,32 +480,5 @@ def handle_end_game(methods=['GET', 'POST']):
 
 
 
-
-
-# Tests
-def runTests():
-    trickInfo = {}
-    trickInfo["suitLead"] = "d"
-
-    if (compareCardsLow("d12", "d9", trickInfo)):
-        print("TestFailed: 1")
-
-    if (compareCardsSuit("d14", "c11", "s", trickInfo)):
-        print("TestFailed: 2")
-
-    if (compareCardsSuit("d14", "d11", "d", trickInfo)):
-        print("TestFailed: 3")  
-
-    if (compareCardsHigh("d9", "d12", trickInfo)):
-        print("TestFailed: 4") 
-
-    if (compareCardsHigh("c14", "d9", trickInfo)):
-        print("TestFailed: 5")     
-
-    if (compareCardsSuit("d11", "h11", "h", trickInfo)):
-        print("TestFailed: 6")
-
-
 if __name__ == '__main__':
-    # runTests()
     socketio.run(app, host='0.0.0.0', port=config.port, debug=False)

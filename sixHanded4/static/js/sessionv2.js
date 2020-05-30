@@ -707,6 +707,7 @@ function hideStuffAfterBidding(){
 
 function clearPlayedCards(){
     $(".liveCard").css("background-color", "transparent");
+    $(".liveCard").css("box-shadow", "none");
     $(".liveCard").html("");
 }
 
@@ -911,6 +912,7 @@ function placeLiveCard(card, playerInd){
     $("#liveCard" + cardPosition).val(card);
     $("#liveCard" + cardPosition).css("color", cardCharacteristics["color"]);
     $("#liveCard" + cardPosition).css("background-color", "white");
+    $("#liveCard" + cardPosition).css("box-shadow", "0 1px 0 1px rgba(0, 0, 0, 0.08), 0 1px 0 2px rgba(0, 0, 0, 0.05), 0 1px 0 3px rgba(0, 0, 0, 0.02)");
     $("#liveCard" + cardPosition).html(cardCharacteristics["rank"] + "<br>" + convertSuitToImageHtml(cardCharacteristics["suit"]));
     $("#liveCard" + cardPosition).show();
 }

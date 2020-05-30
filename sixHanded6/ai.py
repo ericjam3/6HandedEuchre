@@ -445,7 +445,6 @@ class AI:
     def checkAcesNines(self, bestRank):
         for card in self.myCards:
             rank = self.getRank(card)
-            suit = self.getSuit(card)
 
             if rank == bestRank:
                 return card
