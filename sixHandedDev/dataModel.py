@@ -47,11 +47,13 @@ def setBid(bidInfo):
 
 def trackCardPlayed(card, playerInd):
     liveCards[playerInd] = card
-    botTrackCardPlayed(card)
+    botTrackCardPlayed(card, playerInd)
     removeCard(card, playerInd)
 
 def removeCard(card, playerInd):
-    if players[playerInd] not in botDict:
+    curBid = int(dicts["highBid"]["high"])
+
+    if curBid < 9 or players[playerInd] not in botDict:
         playersHands[playerInd].remove(card)
 
 def getState(playerInd):
@@ -148,7 +150,12 @@ def getShuffledDeck():
                 deck.append(letter + str(number))
 
     random.shuffle(deck)
+
+    # deck = ['c14', 's10', 'h13', 's11', 'd12', 'h13', 'h12', 's13', 'c12', 'd9', 'd10', 's13', 'c10', 'c13', 'h9', 'h10', 's14', 's10', 'c10', 's14', 'h9', 'c14', 'h14', 'd10', 's12', 'd14', 'h11', 's11', 'd9', 'c12', 'd13', 'd11', 'h12', 'd13', 'c11', 'c13', 'h14', 'd11', 'h10', 's12', 'c9', 'c9', 's9', 'd12', 'c11', 's9', 'h11', 'd14']
+    # dicts["handInfo"]["dealer"] = 5
+
     currentDeck = deck
+    print(deck)
 
     setPlayerHands(deck)
 
@@ -186,11 +193,11 @@ def getTrump():
 
 ###############################################################
 
-def addBot(name, index):
+def addBot(name, skill, index):
     global botDict
 
     addPlayer(name)
-    botDict[name] = AI(name, index, 5)
+    botDict[name] = AI(name, index, skill)
 
 def dealCardsToBots(deck):
     global botDict
@@ -260,11 +267,11 @@ def playBotCard(curPlayerInd):
 
     return -1
 
-def botTrackCardPlayed(card):
+def botTrackCardPlayed(card, playerInd):
     for key in botDict:
         bot = botDict[key]
 
-        bot.recalculateCardsRemaining(card)
+        bot.recalculateCardsRemaining(card, playerInd, dicts["trickInfo"]["suitLead"])
 
 def tryBotPassing(offset, bidderInd):
     global dicts

@@ -56,16 +56,18 @@ function hideBotScreen(){
 
 function submitBot(){
     let botName = $("#botName").val();
+    let botSkill = $('input[name="botSkill"]:checked').val();
 
     if (botName){
-        addBotPlayer(botName);
+        addBotPlayer(botName, botSkill);
         hideBotScreen();
     }
 }
 
-function addBotPlayer(botName){
+function addBotPlayer(botName, botSkill){
     socket.emit('add bot', {
-        botName: botName
+        botName: botName,
+        botSkill: botSkill
     })
 }
 

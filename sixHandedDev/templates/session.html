@@ -51,8 +51,12 @@
   <div id="botForm">
     <label for="botName">Name:</label>
     <input type="text" id="botName" class="username"/><br>
-    <!-- <label for="riskLevel">Aggressiveness (1 to 10):</label>
-    <input type="number" id="riskLevel" class="username" min="1" max="10"/><br> -->
+    <input type="radio" name="botSkill" id="serviceable" value="serviceable" />
+    <label for="serviceable">Serviceable</label>
+    <input type="radio" name="botSkill" id="clutch" value="clutch" checked />
+    <label for="clutch">Clutch</label>
+    <input type="radio" name="botSkill" id="cerebral" value="cerebral" />
+    <label for="cerebral">Cerebral</label><br>
     <input type="submit" id="submitBotName" class="submit" onclick="submitBot()"/>
   </div>
 
