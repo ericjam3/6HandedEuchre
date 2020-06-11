@@ -9,6 +9,11 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mousetrap/1.4.6/mousetrap.min.js"></script>
+  
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
   <script src="../static/js/config.js"></script>
   <script src="../static/js/sessionv2.js"></script>
   <link rel="stylesheet" type="text/css" href="../static/css/session.css">
@@ -44,7 +49,7 @@
     <br>
   </div>
 
-  <div id="roomLink">
+  <div class="_shadow _rounded" id="roomLink">
     
   </div>
 
@@ -124,8 +129,43 @@
 
     </div>
 
-    <div id="bidding" class="box">
-      <select id="bidNumber" onchange="setupBidNumberChange()">
+    <div id="bidding" class="flexContainer _rounded _shadow">
+      <div class="btn-group" id="bidNumber">
+        <button id="bidNumberButton" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Pass 
+        <span class="caret"></span></button>
+        <ul id="bidNumberDropdown" class="dropdown-menu">
+          <li id="0BidNumber"><a href="#" onclick="setupBidNumberChange('0')">Pass</a></li>
+          <li id="1BidNumber"><a href="#" onclick="setupBidNumberChange('1')">1</a></li>
+          <li id="2BidNumber"><a href="#" onclick="setupBidNumberChange('2')">2</a></li>
+          <li id="3BidNumber"><a href="#" onclick="setupBidNumberChange('3')">3</a></li>
+          <li id="4BidNumber"><a href="#" onclick="setupBidNumberChange('4')">4</a></li>
+          <li id="5BidNumber"><a href="#" onclick="setupBidNumberChange('5')">5</a></li>
+          <li id="6BidNumber"><a href="#" onclick="setupBidNumberChange('6')">6</a></li>
+          <li id="7BidNumber"><a href="#" onclick="setupBidNumberChange('7')">7</a></li>
+          <li id="8BidNumber"><a href="#" onclick="setupBidNumberChange('8')">8</a></li>
+          <li id="9BidNumber"><a href="#" onclick="setupBidNumberChange('9')">Horse</a></li>
+          <li id="10BidNumber"><a href="#" onclick="setupBidNumberChange('p')">Pepper</a></li>
+        </ul>
+      </div>
+
+      <div class="btn-group" id="bidType">
+        <button id="bidTypeButton" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a id="cType" href="#" onclick="setupBidTypeChange('c')"><img class='suitDropdown' src='../static/images/clubs.png'></img> Clubs</a></li>
+          <li><a id="dType" href="#" onclick="setupBidTypeChange('d')"><img class='suitDropdown' src='../static/images/diamonds.png'></img> Diamonds</a></li>
+          <li><a id="sType" href="#" onclick="setupBidTypeChange('s')"><img class='suitDropdown' src='../static/images/spades.png'></img> Spades</a></li>
+          <li><a id="hType" href="#" onclick="setupBidTypeChange('h')"><img class='suitDropdown' src='../static/images/hearts.png'></img> Hearts</a></li>
+          <li><a id="highType" href="#" onclick="setupBidTypeChange('high')"><span class="glyphicon glyphicon-arrow-up"></span> High</a></li>
+          <li><a id="lowType" href="#" onclick="setupBidTypeChange('low')"><span class="glyphicon glyphicon-arrow-down"></span> Low</a></li>
+        </ul>
+      </div>
+      
+      <div class="btn-group">
+        <button id="submitBid" class="submit" onclick="submitBid()">Submit</button>
+      </div>
+
+      <!-- <select id="bidNumber" onchange="setupBidNumberChange()">
         <option value=0>Pass</option>
         <option value=1>1</option>
         <option value=2>2</option>
@@ -147,15 +187,13 @@
         <option value="d">Diamonds</option>
         <option value="h">Hearts</option>
         <option value="s">Spades</option>
-      </select>
-      
-      <button id="submitBid" class="submit" onclick="submitBid()">Submit</button>
+      </select> -->
     </div>
 
     <!-- <img class='birthdayImage' src='../static/images/logo.png'></img> -->
   </div>
 
-  <div id="scoreboard" class="box">
+  <div id="scoreboard" class="box _rounded _shadow">
     <div id="scores">
       <div id="orangeScoreboard" class="scores">
         Score: <div id="orangeScore">

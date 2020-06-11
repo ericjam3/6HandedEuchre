@@ -845,6 +845,9 @@ class AI:
         if not self.hasTrump():
             tryTrumpIn = False
 
+        if not isLosing and trickInfo["cardsPlayed"] == 5:
+            return self.getUselessCard()
+
         if self.highCards[suitLead] != None and (trickInfo["highCard"] == self.highCards[suitLead] or self.isFirstCardBetter(trickInfo["highCard"], self.highCards[suitLead])):
             if not isLosing or tryTrumpIn == False:
                 return self.getUselessCard()
@@ -951,7 +954,7 @@ class AI:
             if suit not in suitsWithTopCards and howManyOfEachSuit[suit] == 1:
                 return card
 
-            if suit not in suitsWithTopCards or howManyOfEachSuit[suit] > 2 or self.possessTopCardOfSuit(suit, trump):
+            if suit not in suitsWithTopCards or howManyOfEachSuit[suit] > 2:
                 if worstCard == None:
                     worstCard = card
                 else:

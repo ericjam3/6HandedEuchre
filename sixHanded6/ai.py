@@ -1,10 +1,10 @@
 import math
 
 class AI:
-    def __init__(self, name, playerIndex, riskLevel):
+    def __init__(self, name, playerIndex, skillLevel):
         self.name = name
         self.playerIndex = playerIndex
-        self.riskLevel = riskLevel
+        self.skillLevel = skillLevel
         self.suits = ["c", "d", "h", "s"]
 
     def getName(self):
@@ -55,26 +55,29 @@ class AI:
             highestBidType = "low"
             highestBidNumber = lowBid
 
-        highestBidNumber = self.trueRound(highestBidNumber)
-        return {"bidNumber": self.finalBidNumber(bidsList, highestBidNumber, highestBidType, gameState), "bidType": highestBidType}
+        highestBidNumberRounded = self.trueRound(highestBidNumber)
 
-    def finalBidNumber(self, bidsList, myBidNumber, myBidType, gameState):
+        return {"bidNumber": self.finalBidNumber(bidsList, highestBidNumberRounded, highestBidNumber, highestBidType), "bidType": highestBidType}
+
+    def finalBidNumber(self, bidsList, myBidNumber, myBidNumberDecimal, myBidType):
         highestPrevBid = None
         highestBidderInd = None
         highestBidType = None
-        numBids = 0
         counter = 0
 
         if myBidNumber > 9:
             return "p"
+
+        if self.skillLevel == "cerebral":
+            myBidNumber = self.getFinalBidCerebral(self.howManyPreviousBidders(bidsList), myBidNumberDecimal, myBidType, bidsList)
+        elif self.skillLevel == "serviceable":
+            myBidNumber = self.roundDown(myBidNumberDecimal)
 
         for bid in bidsList:
             counter += 1
             if bid is None:
                 continue
             
-            numBids += 1
-
             if int(bid["bidNumber"]) >= myBidNumber:
                 return "0"
 
@@ -87,13 +90,81 @@ class AI:
                 highestBidderInd = counter - 1
                 highestBidType = bid["bidType"]
 
-        if numBids == 5 and myBidNumber < 9:
+        if self.isLastBidder(bidsList) and myBidNumber < 9:
             if (highestBidderInd % 2 == self.getIndex() % 2) and (myBidType == highestBidType):
                 return "0"
             else:
                 myBidNumber = highestPrevBid + 1
 
         return str(int(myBidNumber))
+
+    def getFinalBidCerebral(self, bidderInd, myBidNumber, myBidType, bidsList):
+        currentHighestBid = self.getHighestCurrentBid(bidsList)
+        otherTeamBid = self.whatDidMyTeamBid(self.getIndex() + 1, bidsList)
+        myTeamBid = self.whatDidMyTeamBid(self.getIndex(), bidsList)
+
+        if bidderInd == 0:
+            return self.adjustBidFirstBidder(myBidNumber)
+        elif bidderInd == 5: 
+            if myTeamBid == None and self.pointSpread < 8:
+                myBidNumber = myBidNumber + (.3 * currentHighestBid)
+        elif (bidderInd == 4 or bidderInd == 3) and int(myTeamBid["bidNumber"]) > int(otherTeamBid["bidNumber"]) \
+            and myTeamBid["bidType"] == myBidType and currentHighestBid > 3:
+            myBidNumber = myBidNumber + ((int(otherTeamBid["bidNumber"]) - int(myTeamBid["bidNumber"])) * .25)
+
+        return self.trueRound(myBidNumber)
+
+    def adjustBidFirstBidder(self, highestBidNumber):
+        if highestBidNumber < 4:
+            highestBidNumber = self.roundUp(highestBidNumber)
+        elif highestBidNumber > 4:
+            highestBidNumber = self.roundDown(highestBidNumber)
+        else:
+            highestBidNumber = self.trueRound(highestBidNumber)
+
+        return highestBidNumber
+
+    def getHighestCurrentBid(self, bidsList):
+        highestBid = None
+
+        for bid in bidsList:
+            if bid == None:
+                continue
+
+            if highestBid == None:
+                highestBid = bid["bidNumber"]
+            elif bid["bidNumber"] > highestBid:
+                highestBid = bid["bidNumber"]
+
+        if highestBid == None:
+            highestBid = 0
+
+        return int(highestBid)
+
+    # Also used to check what other team bid by passing in bidderInd + 1
+    def whatDidMyTeamBid(self, bidderInd, bidsList):
+        myTeamBid = None
+        for i in range(len(bidsList)):
+            bid = bidsList[i]
+
+            if not self.isOnSameTeam(i, bidderInd) or bid == None:
+                continue
+
+            if myTeamBid == None:
+                myTeamBid = bid
+            elif int(bid["bidNumber"]) > int(myTeamBid["bidNumber"]):
+                myTeamBid = bid
+
+        if myTeamBid == None:
+            myTeamBid = {"bidNumber": 0, "bidType": None}
+
+        return myTeamBid
+        
+    def isOnSameTeam(self, indA, indB):
+        if indA % 2 == indB % 2:
+            return True
+
+        return False
 
     def calcHighBid(self, bidsList, gameState):
         howManyOfEachSuit = {"c": 0, "d": 0, "h": 0, "s": 0}
@@ -127,6 +198,7 @@ class AI:
     def adjustBid(self, baseBidNumber, baseBidType, bidsList):
         sameBids = {"us": 0, "them": 0}
         highBids = {"us": 0, "them": 0}
+        lowBids = {"us": 0, "them": 0}
         nextSuitBids = {"us": 0, "them": 0}
 
         for i in range(len(bidsList)):
@@ -155,10 +227,19 @@ class AI:
                 else:
                     highBids["them"] = max(highBids["them"], otherBidNumber)
 
+            if bid["bidType"] == "low":
+                if (self.getIndex() % 2) == (i % 2):
+                    lowBids["us"] = max(lowBids["us"], otherBidNumber)
+                else:
+                    lowBids["them"] = max(lowBids["them"], otherBidNumber)
+
         finalBid = baseBidNumber + sameBids["us"] - (sameBids["them"] * .5)
         if baseBidType != "low" and baseBidType != "high":
             finalBid += (highBids["us"] * .4) - (highBids["them"] * .5)
             finalBid += (nextSuitBids["us"] * .25) - (nextSuitBids["them"] * .45)
+
+            if self.skillLevel == "cerebral" and baseBidType != "low":
+                finalBid += (lowBids["them"] * .25) - (lowBids["us"] * .25)
 
         if sameBids["us"] > 2:
             finalBid -= (.3 * sameBids["us"])
@@ -212,6 +293,12 @@ class AI:
 
         return numBidders
 
+    def isFirstBidder(self, bidsList):
+        return (self.howManyPreviousBidders(bidsList) == 0)
+
+    def isLastBidder(self, bidsList):
+        return (self.howManyPreviousBidders(bidsList) == 5)
+
     def getSuit(self, card):
         return card[0:1]
 
@@ -264,7 +351,7 @@ class AI:
                 else:
                     points += 1
             
-            elif self.isLeftBower(rank, suit, trump):
+            elif self.isLeftBower(card, trump):
                 howManyTrump += 1
 
                 points += 40
@@ -352,7 +439,10 @@ class AI:
 
         return numLosers
         
-    def isLeftBower(self, rank, suit, trump):
+    def isLeftBower(self, card, trump):
+        rank = self.getRank(card)
+        suit = self.getSuit(card)
+
         if rank != 11:
             return False
 
@@ -375,6 +465,7 @@ class AI:
     def startHand(self, bidInfo):
         self.bid = bidInfo
         self.cardsRemaining = {}
+        self.otherPlayersOutOfSuits = {"c": {}, "d": {}, "h": {}, "s": {}}
 
         if self.bid["type"] == "high":
             self.initializeCardsRemainingHigh()
@@ -405,7 +496,8 @@ class AI:
     def playCard(self, handState, cardsPlayed, trickInfo):
         cardPlayedInfo = {}
 
-        if (self.bid["high"] == "9" or self.bid["high"] == "10") and ((self.bid["playerInd"] % 2) == (self.getIndex() % 2)) and (self.bid["playerInd"] != self.getIndex()):
+        # Your teammate has horsed or peppered
+        if self.isHorseOrPepper() and ((self.bid["playerInd"] % 2) == (self.getIndex() % 2)) and (self.bid["playerInd"] != self.getIndex()):
             cardPlayedInfo["cardPlayed"] = None
             return cardPlayedInfo
 
@@ -419,28 +511,67 @@ class AI:
         self.removePlayedCard(cardPlayedInfo["cardPlayed"])
         return cardPlayedInfo
 
+    def isHorseOrPepper(self):
+        if self.bid["high"] == "9" or self.bid["high"] == "10":
+            return True
+
+        return False
+
     def removePlayedCard(self, card):
         self.myCards.remove(card)
 
     def startTrick(self, handState):
+        if self.isHorseOrPepper() and self.skillLevel != "serviceable":
+            return self.getBestCard()
+
         if self.bid["type"] == "high":
-            return self.startTrickHigh()
+            return self.startTrickHighLow(14, 13)
         elif self.bid["type"] == "low":
-            return self.startTrickLow()
+            return self.startTrickHighLow(9, 10)
         else:
             return self.startTrickSuit(self.bid["type"])
 
-    def startTrickHigh(self):
-        bestLead = self.checkAcesNines(14)
+    def startTrickHighLow(self, bestRank, secondRank):
+        if self.skillLevel == "cerebral":
+            bestLead = self.trollerDogHighLow(bestRank, secondRank)
+            if bestLead is not None:
+                return bestLead
+
+        bestLead = self.checkAcesNines(bestRank)
         if bestLead is not None:
             return bestLead
 
-        bestLead = self.checkRunner(13, True)
-
+        bestLead = self.checkRunner(secondRank, True)
         if bestLead is not None:
             return bestLead
+
+        if self.skillLevel == "cerebral":
+            bestLead = self.getHighLowLeadOtherTeamOutOf()
+
+            if bestLead is not None:
+                return bestLead
 
         return self.getWorstCard()
+
+    def trollerDogHighLow(self, bestRank, secondRank):
+        points = {"c": 0, "d": 0, "h": 0, "s": 0}
+        troller = None
+
+        for card in self.myCards:
+            suit = self.getSuit(card)
+            rank = self.getRank(card)
+
+            if rank == bestRank:
+                points[suit] += 100
+            elif rank == secondRank:
+                points[suit] += 40
+                troller = card
+
+        for suit in points:
+            if points[suit] >= 240:
+                return troller
+
+        return None
 
     def checkAcesNines(self, bestRank):
         for card in self.myCards:
@@ -479,20 +610,23 @@ class AI:
 
         return bestCard
 
-    def startTrickLow(self):
-        bestLead = self.checkAcesNines(9)
-        if bestLead is not None:
-            return bestLead
+    def getHighLowLeadOtherTeamOutOf(self):
+        for card in self.myCards:
+            suit = self.getSuitRespectingTrump(card, self.getTrump())
 
-        bestLead = self.checkRunner(10, False)
+            if not self.otherTeamHasSuit(suit):
+                return card
 
-        if bestLead is not None:
-            return bestLead
-
-        return self.getWorstCard()
+        return None
 
     def startTrickSuit(self, trump):
-        bestLead = self.checkForBestTrump(trump)
+        if self.skillLevel == "cerebral":
+            bestLead = self.trollerDogSuit()
+            if bestLead is not None:
+                return bestLead
+
+        if self.skillLevel != "cerebral" or self.otherTeamHasSuit(trump):
+            bestLead = self.checkForBestTrump(trump)
 
         if bestLead is not None:
             return bestLead
@@ -502,7 +636,46 @@ class AI:
         if bestLead is not None:
             return bestLead
 
+        if self.skillLevel == "cerebral":
+            bestLead = self.tryToShortSuitLead(trump)
+
+            if bestLead is not None:
+                return bestLead
+
         return self.getWorstCard()
+
+    def trollerDogSuit(self):
+        points = {"c": 0, "d": 0, "h": 0, "s": 0}
+        trump = self.getTrump()
+        troller = None
+
+        for card in self.myCards:
+            suit = self.getSuit(card)
+            rank = self.getRank(card)
+
+            if rank == 11 and suit == trump:
+                points[trump] += 100
+            elif self.isLeftBower(card, trump):
+                points[trump] += 40
+                troller = card
+
+        for suit in points:
+            if points[suit] >= 240:
+                return troller
+
+        return None
+
+    def otherTeamHasSuit(self, suit):
+        startInd = 1
+        
+        if self.getIndex() % 2:
+            startInd = 0
+
+        for i in range(startInd, 6, 2):
+            if i not in self.otherPlayersOutOfSuits[suit]:
+                return True
+
+        return False
 
     def checkForBestTrump(self, trump):
         for card in self.myCards:
@@ -522,12 +695,36 @@ class AI:
             rank = self.getRank(card)
             suit = self.getSuit(card)
 
-            if (rank == 14) and (suit != trump) and (suit != nextSuit):
+            if (rank == 14) and (suit != trump) and (suit != nextSuit or self.skillLevel == "serviceable"):
                 return card
             elif (rank == 14) and (suit == nextSuit):
                 nextSuitAce = card
 
         return nextSuitAce
+
+    def tryToShortSuitLead(self, trump):
+        cardToPlay = None
+        cardsOfSuit = {"c": 0, "d": 0, "h": 0, "s": 0}
+        
+        for card in self.myCards:
+            suit = self.getSuitRespectingTrump(card, trump)
+
+            cardsOfSuit[suit] += 1
+        
+        for suit in cardsOfSuit:
+            if suit != trump and cardsOfSuit[suit] == 1:
+                cardToPlay = self.getSingleton(suit, trump)
+
+        return cardToPlay
+
+    def getSingleton(self, checkSuit, trump):
+        for card in self.myCards:
+            suit = self.getSuitRespectingTrump(card, trump)
+
+            if suit == checkSuit:
+                return card
+        
+        return None
 
     def getNextSuit(self, trump):
         if trump == "c":
@@ -570,9 +767,9 @@ class AI:
                 return cardB
             elif cardB == trump + "11":
                 return cardA
-            elif self.isLeftBower(rankA, self.getSuit(cardA), trump):
+            elif self.isLeftBower(cardA, trump):
                 return cardB
-            elif self.isLeftBower(rankB, self.getSuit(cardB), trump):
+            elif self.isLeftBower(cardB, trump):
                 return cardA
             elif rankA > rankB:
                 return cardB
@@ -610,10 +807,9 @@ class AI:
         return (betterCard == cardA)
 
     def getSuitRespectingTrump(self, card, trump):
-        rank = self.getRank(card)
         suit = self.getSuit(card)
 
-        if suit == trump or self.isLeftBower(rank, suit, trump):
+        if suit == trump or self.isLeftBower(card, trump):
             return trump
         
         return suit
@@ -649,9 +845,12 @@ class AI:
         if not self.hasTrump():
             tryTrumpIn = False
 
+        if not isLosing and trickInfo["cardsPlayed"] == 5:
+            return self.getUselessCard()
+
         if self.highCards[suitLead] != None and (trickInfo["highCard"] == self.highCards[suitLead] or self.isFirstCardBetter(trickInfo["highCard"], self.highCards[suitLead])):
             if not isLosing or tryTrumpIn == False:
-                return self.getWorstCard()
+                return self.getUselessCard()
             else:
                 return self.tryTrumpingIn(trickInfo)
         else:
@@ -659,10 +858,14 @@ class AI:
                 return self.tryTrumpingIn(trickInfo)
 
             cardToPlay = self.getBestCard(suitLead)
-            if self.isFirstCardBetter(cardToPlay, trickInfo["highCard"], suitLead):
-                return cardToPlay
-            else:
-                return self.getWorstCard()
+            if self.highCards[suitLead] == None:
+                if self.isFirstCardBetter(cardToPlay, trickInfo["highCard"], suitLead):
+                    return cardToPlay
+            elif self.highCards[suitLead] != None:
+                if self.isFirstCardBetter(cardToPlay, self.highCards[suitLead], suitLead) or cardToPlay == self.highCards[suitLead]:
+                    return cardToPlay
+            
+            return self.getUselessCard()
 
     def hasTrump(self):
         trump = self.bid["type"]
@@ -712,19 +915,83 @@ class AI:
                     cardToPlay = card
 
         if cardToPlay == None:
-            return self.getWorstCard()
+            return self.getUselessCard()
 
         return cardToPlay
 
+    def getUselessCard(self):
+        if self.skillLevel != "cerebral":
+            return self.getWorstCard()
+
+        trump = self.bid["type"]
+        suitsWithTopCards = {}
+        howManyOfEachSuit = {"c": 0, "d": 0, "h": 0, "s": 0}
+
+        for card in self.myCards:
+            rank = self.getRank(card)
+            suit = self.getSuitRespectingTrump(card, trump)
+
+            howManyOfEachSuit[suit] += 1
+
+            if trump != "low" and rank == 14 and suit != trump:
+                suitsWithTopCards[suit] = 1
+            elif trump == "low" and rank == 9:
+                suitsWithTopCards[suit] = 1
+
+        return self.getLeastUsefulCard(suitsWithTopCards, howManyOfEachSuit, trump)
+
+    # Try to get a bad card that will not create a singleton
+    def getLeastUsefulCard(self, suitsWithTopCards, howManyOfEachSuit, trump):
+        worstCard = None
+
+        for card in self.myCards:
+            suit = self.getSuitRespectingTrump(card, trump)
+
+            if suit == trump:
+                continue
+
+            # Try to short suit yourself
+            if suit not in suitsWithTopCards and howManyOfEachSuit[suit] == 1:
+                return card
+
+            if suit not in suitsWithTopCards or howManyOfEachSuit[suit] > 2:
+                if worstCard == None:
+                    worstCard = card
+                else:
+                    worstCard = self.getWorseCardCompare(worstCard, card)
+
+        if worstCard == None:
+            worstCard = self.getWorstCard()
+
+        return worstCard
+
+    def possessTopCardOfSuit(self, suit, trump):        
+        if self.cardsRemaining[suit] < 200:
+            return True
+
+        return False
+
+
 ###################################################################        
 
-    def recalculateCardsRemaining(self, card):
+    def getTrump(self):
+        return self.bid["type"]
+
+    def recalculateCardsRemaining(self, card, playerInd, suitLead):
+        self.checkIfOutOfSuit(card, playerInd, suitLead)
+
         if self.bid["type"] == "high":
             self.recalculateHighRemaining(card)
         elif self.bid["type"] == "low":
             self.recalculateLowRemaining(card)
         else:
             self.recalculateSuitRemaining(card, self.bid["type"])
+
+    def checkIfOutOfSuit(self, card, playerInd, suitLead):
+        suit = self.getSuitRespectingTrump(card, self.getTrump())
+
+        if playerInd != self.getIndex() and suit != suitLead:
+            self.otherPlayersOutOfSuits[suitLead][playerInd] = 1
 
     def recalculateHighRemaining(self, card):
         suit = self.getSuit(card)
@@ -770,7 +1037,7 @@ class AI:
 
             self.setHighCardTrump(trump)
         
-        elif self.isLeftBower(rank, suit, trump):
+        elif self.isLeftBower(card, trump):
             self.cardsRemaining[trump] -= 40
             self.setHighCardTrump(trump)
 
@@ -891,3 +1158,9 @@ class AI:
             return int(math.ceil(number))
         else:
             return int(math.floor(number))
+
+    def roundUp(self, number):
+        return int(math.ceil(number))
+
+    def roundDown(self, number):
+        return int(math.floor(number))

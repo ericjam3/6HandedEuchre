@@ -45,7 +45,7 @@ def handle_signin(json, methods=['GET', 'POST']):
 @socketio.on('add bot')
 def handle_add_bot(json, methods=['GET', 'POST']):
     if (len(dataModel.players) < dataModel.numPlayers) and (json['botName'] not in dataModel.players):
-        dataModel.addBot(json['botName'], len(dataModel.players))
+        dataModel.addBot(json['botName'], json['botSkill'], len(dataModel.players))
         socketio.emit('playersIn', {"players": dataModel.players})
         tryStartingGame()
 

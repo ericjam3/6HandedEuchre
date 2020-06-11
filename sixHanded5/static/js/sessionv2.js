@@ -11,6 +11,8 @@ var currentStage = "Opening";
 var dicts = {};
 var dropCount = 0;
 var passedCards = [];
+var bidNumber;
+var bidType;
 
 /////////////////////////////////////////////////////////////////////
 
@@ -56,16 +58,18 @@ function hideBotScreen(){
 
 function submitBot(){
     let botName = $("#botName").val();
+    let botSkill = $('input[name="botSkill"]:checked').val();
 
     if (botName){
-        addBotPlayer(botName);
+        addBotPlayer(botName, botSkill);
         hideBotScreen();
     }
 }
 
-function addBotPlayer(botName){
+function addBotPlayer(botName, botSkill){
     socket.emit('add bot', {
-        botName: botName
+        botName: botName,
+        botSkill: botSkill
     })
 }
 
@@ -232,28 +236,53 @@ function setUIToWaiting(){
  // Set up the UI
 function setupUI(){
     $("#gametable").hide();
+    $("#bidding").hide();
     $("#username").focus();
 }
 
-function setupBidNumberChange(){
-    if ($("#bidNumber").val() == "0"){
+function setupBidNumberChange(strNumber){
+    bidNumber = strNumber;
+
+    let caret = getCaret();
+    if (strNumber == "0"){
         $("#bidType").hide();
+        bidType = "";
+
         $("#submitBid").prop('disabled', false);
+
+        $("#bidNumberButton").html("Pass" + caret);
     }else{
         $("#bidType").show();
         
-        if ($("#bidType").val() == ""){
+        if (bidType == ""){
             $("#submitBid").prop('disabled', true);
+        }
+
+        if (strNumber == "p"){
+            $("#bidNumberButton").html("Pepper" + caret);
+            return;
+        }
+        
+        let number = parseInt(strNumber);
+        if (number == 9){
+            $("#bidNumberButton").html("Horse" + caret);
+        }else{
+            $("#bidNumberButton").html(strNumber + caret);
         }
     }
 }
 
-function setupBidTypeChange(){
-    if ($("#bidType").val() == ""){
-        $("#submitBid").prop('disabled', true);
-    }else{
-        $("#submitBid").prop('disabled', false);
-    }
+function setupBidTypeChange(type){
+    bidType = type;
+
+    let caret = getCaret();
+
+    $("#submitBid").prop('disabled', false);
+    $("#bidTypeButton").html($("#" + type + "Type").html() + caret); 
+}
+
+function getCaret(){
+    return ' <span class="caret"></span>';
 }
 
 socket.on( 'begin', function( players ) {
@@ -506,20 +535,41 @@ function presentBids(currentBid){
 // Hide bids less than or equal to current bid
 function hideBidHtml(currentBid){
     let bidNumber = parseInt(currentBid);
-    for (let i = 1; i <= bidNumber; i++){
-        // $("#bidNumber").children("option[value=" + i + "]").hide();
-        $("#bidNumber").children("option[value=" + i + "]").attr('disabled', 'disabled').hide();
-    }
+    showBidHtml(bidNumber);
 }
 
 // Show all bids for a new hand
-function showBidHtml(){
+function showBidHtml(highestBid = 0){
+    htmlString = "";
     for (let i = 0; i <= 10; i++){
-        $("#bidNumber").children("option[value=" + i + "]").removeAttr('disabled').show();
+        // hide certain options
+        if (i != 0 && i <= highestBid){
+            continue;
+        }
+
+        // Special handling
+        let num = i;
+        let bid = i;
+
+        if (num == 10){
+            num = "p";
+            bid = "Pepper";
+        }else if (num == 9){
+            bid = "Horse";
+        }else if (num == 0){
+            bid = "Pass";
+        }
+
+        // General handling
+        htmlString += "<li id='" + i + "BidNumber'><a href='#' onclick='setupBidNumberChange(\"" + num + "\")'>" + bid + "</a></li>";
     }
 
-    $("#bidNumber").val("0");
-    $("#bidType").val("");
+    $("#bidNumberDropdown").html(htmlString);
+
+    bidNumber = "0";
+    bidType = "";
+    $("#bidNumberButton").html("Pass" + getCaret());
+    $("#bidTypeButton").html(getCaret());
     $("#bidType").hide();
 }
 
@@ -548,8 +598,8 @@ function submitBid(){
     }
 
     socket.emit('submit bid', {
-        bidNumber : $("#bidNumber").val(),
-        bidType : $("#bidType").val(),
+        bidNumber : bidNumber,
+        bidType : bidType,
         nextBidder: nextBidder,
         currentBidder: playerPosition,
         dicts: dicts

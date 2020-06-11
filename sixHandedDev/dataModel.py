@@ -151,14 +151,12 @@ def getShuffledDeck():
 
     random.shuffle(deck)
 
-    # deck = ['c14', 's10', 'h13', 's11', 'd12', 'h13', 'h12', 's13', 'c12', 'd9', 'd10', 's13', 'c10', 'c13', 'h9', 'h10', 's14', 's10', 'c10', 's14', 'h9', 'c14', 'h14', 'd10', 's12', 'd14', 'h11', 's11', 'd9', 'c12', 'd13', 'd11', 'h12', 'd13', 'c11', 'c13', 'h14', 'd11', 'h10', 's12', 'c9', 'c9', 's9', 'd12', 'c11', 's9', 'h11', 'd14']
+    # deck = ['d12', 'd14', 's14', 'd13', 'c12', 's10', 'h12', 'h11', 'd10', 'c13', 'h10', 's13', 'h10', 'c11', 's11', 'd14', 'c9', 'd11', 's12', 's12', 'h9', 'd10', 'h14', 'd12', 'c11', 's9', 'c14', 'c9', 'c10', 'h14', 's9', 's13', 'c10', 'h13', 'c14', 's14', 'd13', 'h11', 's11', 'd9', 'c12', 'd9', 'h9', 'h13', 's10', 'h12', 'c13', 'd11']
     # dicts["handInfo"]["dealer"] = 5
+    # print(deck)
 
     currentDeck = deck
-    print(deck)
-
     setPlayerHands(deck)
-
     return deck
 
 def setInitialHandInfo():
