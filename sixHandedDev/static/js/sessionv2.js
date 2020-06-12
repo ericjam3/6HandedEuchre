@@ -256,6 +256,7 @@ function setupBidNumberChange(strNumber){
         
         if (bidType == ""){
             $("#submitBid").prop('disabled', true);
+            $("#bidTypeButton").html(caret);
         }
 
         if (strNumber == "p"){
@@ -462,7 +463,7 @@ function getColor(suit){
     if (suit == "c" || suit == "s"){
         return "black";
     }else{
-        return "red";
+        return "#d40000";
     }
 }
 

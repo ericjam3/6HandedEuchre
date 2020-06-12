@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(122, 137, 158);
+    background-color: rgb(189, 191, 204);
 }
 
 #signinScreen {
@@ -151,7 +151,7 @@ body {
 }
 
 #bidTypeButton {
-    width: 115px;
+    width: 125px;
 }
 
 .box {
@@ -185,8 +185,8 @@ body {
 }
 
 .submit {
-    border: 1px solid rgb(9, 9, 124);
-    background-color: rgb(166, 198, 243);
+    border: none;
+    background-color: rgb(109, 159, 230);
 }
 
 .submit:hover:enabled {
@@ -195,8 +195,8 @@ body {
 }
 
 .endGame {
-    border: 1px solid rgb(135, 0, 0);
-    background-color: rgb(243, 166, 166);
+    border: none;
+    background-color: rgb(223, 110, 110);
 }
 
 .endGame:hover:enabled {
@@ -205,12 +205,12 @@ body {
 }
 
 .neutral {
-    border: 1px solid rgb(160, 111, 3);
-    background-color: rgb(247, 242, 113);
+    border: none;
+    background-color: rgb(72, 196, 66);
 }
 
 .neutral:hover:enabled {
-    background-color: rgb(160, 111, 3);
+    background-color: rgb(28, 120, 10);
     color: white;
 }
 
@@ -239,8 +239,8 @@ body {
 }
 
 #gameInfo {
-    border-top: 1px solid black;
     display: flex;
+    font-size: 13px;
 }
 
 .scores {
@@ -265,12 +265,12 @@ body {
 }
 
 #orangeScoreboard {
-    background-color: #f28a1b;
+    background-color: #fda03d;
     flex-grow: 1;
 }
 
 #blueScoreboard {
-    background-color: #3e6ba7;
+    background-color: rgb(109, 159, 230);
     flex-grow: 1;
 }
 
@@ -387,10 +387,7 @@ img {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
     background-color: white;
-    border: 2px solid black;
-    border-radius: 5px;
     padding: 10px;
 }
 

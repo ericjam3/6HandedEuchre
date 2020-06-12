@@ -153,12 +153,10 @@ def getShuffledDeck():
 
     # deck = ['d12', 'd14', 's14', 'd13', 'c12', 's10', 'h12', 'h11', 'd10', 'c13', 'h10', 's13', 'h10', 'c11', 's11', 'd14', 'c9', 'd11', 's12', 's12', 'h9', 'd10', 'h14', 'd12', 'c11', 's9', 'c14', 'c9', 'c10', 'h14', 's9', 's13', 'c10', 'h13', 'c14', 's14', 'd13', 'h11', 's11', 'd9', 'c12', 'd9', 'h9', 'h13', 's10', 'h12', 'c13', 'd11']
     # dicts["handInfo"]["dealer"] = 5
-
-    currentDeck = deck
     # print(deck)
 
+    currentDeck = deck
     setPlayerHands(deck)
-
     return deck
 
 def setInitialHandInfo():

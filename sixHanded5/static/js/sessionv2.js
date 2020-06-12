@@ -462,7 +462,7 @@ function getColor(suit){
     if (suit == "c" || suit == "s"){
         return "black";
     }else{
-        return "red";
+        return "#d40000";
     }
 }
 
