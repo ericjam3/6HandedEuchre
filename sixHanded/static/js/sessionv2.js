@@ -256,6 +256,7 @@ function setupBidNumberChange(strNumber){
         
         if (bidType == ""){
             $("#submitBid").prop('disabled', true);
+            $("#bidTypeButton").html(caret);
         }
 
         if (strNumber == "p"){

@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(122, 137, 158);
+    background-color: rgb(211, 213, 224);
 }
 
 #signinScreen {
@@ -148,10 +148,11 @@ body {
 
 #bidNumberButton {
     width: 90px;
+    transform: translate(0px, 2px);
 }
 
 #bidTypeButton {
-    width: 115px;
+    width: 125px;
 }
 
 .box {
@@ -178,25 +179,29 @@ body {
 
 .submit, .endGame, .neutral {
     border-radius: 3px;
-    padding: 5px;
+    padding: 7px;
     font-weight: bold;
     cursor: pointer;
     margin: 5px;
 }
 
+.submit:active, .endGame:active, .neutral:active {
+    outline: none;
+}
+
 .submit {
-    border: 1px solid rgb(9, 9, 124);
-    background-color: rgb(166, 198, 243);
+    border: none;
+    background-color: rgb(109, 159, 230);
 }
 
 .submit:hover:enabled {
-    background-color: rgb(9, 9, 124);
+    background-color: rgb(42, 42, 174);
     color: white;
 }
 
 .endGame {
-    border: 1px solid rgb(135, 0, 0);
-    background-color: rgb(243, 166, 166);
+    border: none;
+    background-color: rgb(223, 110, 110);
 }
 
 .endGame:hover:enabled {
@@ -205,17 +210,18 @@ body {
 }
 
 .neutral {
-    border: 1px solid rgb(160, 111, 3);
-    background-color: rgb(247, 242, 113);
+    border: none;
+    background-color: rgb(72, 196, 66);
 }
 
 .neutral:hover:enabled {
-    background-color: rgb(160, 111, 3);
+    background-color: rgb(28, 120, 10);
     color: white;
 }
 
 #endGameInitial {
     position: fixed;
+    margin: 0px;
     top: 4px;
     left: 4px;
 }
@@ -239,8 +245,8 @@ body {
 }
 
 #gameInfo {
-    border-top: 1px solid black;
     display: flex;
+    font-size: 13px;
 }
 
 .scores {
@@ -265,12 +271,12 @@ body {
 }
 
 #orangeScoreboard {
-    background-color: #f28a1b;
+    background-color: #fda03d;
     flex-grow: 1;
 }
 
 #blueScoreboard {
-    background-color: #3e6ba7;
+    background-color: rgb(109, 159, 230);
     flex-grow: 1;
 }
 
@@ -373,6 +379,11 @@ img {
 
 #clearPlayersButtonContainer {
     display: none;
+}
+
+#clearPlayersButtonContainer:hover {
+    background-color: rgb(135, 0, 0);
+    color: white;
 }
 
 #roomFullDiv {

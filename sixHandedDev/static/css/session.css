@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(189, 191, 204);
+    background-color: rgb(211, 213, 224);
 }
 
 #signinScreen {
@@ -148,6 +148,7 @@ body {
 
 #bidNumberButton {
     width: 90px;
+    transform: translate(0px, 2px);
 }
 
 #bidTypeButton {
@@ -178,10 +179,14 @@ body {
 
 .submit, .endGame, .neutral {
     border-radius: 3px;
-    padding: 5px;
+    padding: 7px;
     font-weight: bold;
     cursor: pointer;
     margin: 5px;
+}
+
+.submit:active, .endGame:active, .neutral:active {
+    outline: none;
 }
 
 .submit {
@@ -190,7 +195,7 @@ body {
 }
 
 .submit:hover:enabled {
-    background-color: rgb(9, 9, 124);
+    background-color: rgb(42, 42, 174);
     color: white;
 }
 
@@ -216,6 +221,7 @@ body {
 
 #endGameInitial {
     position: fixed;
+    margin: 0px;
     top: 4px;
     left: 4px;
 }
@@ -373,6 +379,11 @@ img {
 
 #clearPlayersButtonContainer {
     display: none;
+}
+
+#clearPlayersButtonContainer:hover {
+    background-color: rgb(135, 0, 0);
+    color: white;
 }
 
 #roomFullDiv {
