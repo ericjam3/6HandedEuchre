@@ -51,7 +51,7 @@ body {
 }
 
 #player1 {
-    top: 50%;
+    top: 45%;
     left: 18%;
     transform: translate(-50%, -50%);
 }
@@ -62,7 +62,7 @@ body {
 }
 
 #player3 {
-    top: 50%;
+    top: 45%;
     left: 82%;
     transform: translate(-50%, -50%);
 }
@@ -106,11 +106,11 @@ body {
 }
 
 #liveCardLayer1 {
-    margin-bottom: 50px;
+    margin: 40px 0px;
 }
 
 #liveCardLayer2 {
-    margin-top: 50px;
+    margin: 40px 0px;
 }
 
 .liveCardLayer {
