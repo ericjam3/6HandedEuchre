@@ -109,7 +109,7 @@ function showLoggedInPlayers(loggedInPlayers){
     $("#orangePlayersLoggedIn").html(orangeHtmlString);
     $("#bluePlayersLoggedIn").html(blueHtmlString);
 
-    if (loggedInPlayers.length < 6){
+    if (loggedInPlayers.length < 4){
         $("#clearPlayersButtonContainer").show();
     }else{
         $("#clearPlayersButtonContainer").hide();
@@ -162,7 +162,7 @@ function setGameState(data){
         setUIToWaiting();
     }else if (currentStage == "dropHorse"){
         if (dicts.highBid.playerInd == playerPosition){
-            dropTwoCardsHorse();
+            dropOneCardHorse();
         }else{
             showDropping(dicts.highBid.playerInd);
             currentStage = "waiting";
@@ -501,12 +501,12 @@ function getCardRankAndSuit(card){
 
 socket.on( 'deal', function( json ) {
     clearPlayedCards();
-    showBidHtml();
     dicts = json.dicts;
+    showBidHtml();
 
     currentStage = "bidding";
 
-    myCards = json.deck.slice(playerPosition * 8, (playerPosition + 1) * 8);
+    myCards = json.deck.slice(playerPosition * 6, (playerPosition + 1) * 6);
 
     sortCards();
     showCards();
@@ -544,7 +544,11 @@ function showBidHtml(highestBid = 0){
     htmlString = "";
     for (let i = 0; i <= 10; i++){
         // hide certain options
-        if (i != 0 && i <= highestBid){
+        if (screwDealer(highestBid) && i == 0){
+            continue
+        }
+
+        if ((i > 0 && i < 4) || (i > 6 && i < 9) || (i != 0 && i <= highestBid)){
             continue;
         }
 
@@ -566,12 +570,43 @@ function showBidHtml(highestBid = 0){
     }
 
     $("#bidNumberDropdown").html(htmlString);
+    setDefaultBid(screwDealer(highestBid));
+}
 
-    bidNumber = "0";
-    bidType = "";
-    $("#bidNumberButton").html("Pass" + getCaret());
-    $("#bidTypeButton").html(getCaret());
-    $("#bidType").hide();
+function screwDealer(highestBid){
+    if (highestBid == 0 && isLastToBid()){
+        return true;
+    }
+
+    return false;
+}
+
+function isLastToBid(){
+    let spreadFromDealer = dicts.handInfo.dealer - playerPosition;
+
+    if (spreadFromDealer == 1 || spreadFromDealer == -3){
+        return true;
+    }
+
+    return false;
+}
+
+function setDefaultBid(isScrewDealer){
+    if (isScrewDealer){
+        bidNumber = "4";
+        bidType = "c";
+        $("#bidNumberButton").html(getCaret());
+        $("#bidTypeButton").html(getCaret());
+        $("#bidType").hide();
+        $("#submitBid").prop('disabled', true);
+    }else{
+        bidNumber = "0";
+        bidType = "";
+        $("#bidNumberButton").html("Pass" + getCaret());
+        $("#bidTypeButton").html(getCaret());
+        $("#bidType").hide();
+        $("#submitBid").prop('disabled', false);
+    }
 }
 
 // Hide bidding display
@@ -594,7 +629,7 @@ function submitBid(){
 
     hideBidding();
     let nextBidder = playerPosition + 1;
-    if (nextBidder > 5){
+    if (nextBidder > 3){
         nextBidder = 0;
     }
 
@@ -623,7 +658,7 @@ function placePreviousBidHtml(bidInfo){
 function getPlayerPos(rawInd){
     let pos = rawInd - playerPosition;
     if (pos < 0){
-        pos = 6 + pos;
+        pos = 4 + pos;
     }
 
     return pos;
@@ -647,7 +682,7 @@ function convertBidToHtml(bidInfo){
             break;
     }
 
-    html += " " + convertSuitToImageHtml(bidInfo.bidType) + "</div>";
+    html += "</div>";
 
     return html;
 }
@@ -682,7 +717,7 @@ socket.on('done bidding', function(bidInfo){
 function updateScoreboard(showScoreboard, hideBid){
     dealer = dicts.handInfo.dealer;
 
-    $("#dealer").html(playersArray[getPlayerIndInPlayersArray(dealer)]);
+    $("#dealer").html(playersArray[getPlayerIndInPlayersArray(dealer, 1)]);
     $("#orangeTricksTaken").html(dicts.handInfo.orangeTricks);
     $("#blueTricksTaken").html(dicts.handInfo.blueTricks);
 
@@ -704,11 +739,11 @@ function updateScoreboard(showScoreboard, hideBid){
     }
 }
 
-function getPlayerIndInPlayersArray(ind){
-    let pos = ind - playerPosition;
+function getPlayerIndInPlayersArray(ind, offset = 0){
+    let pos = ind - playerPosition - offset;
     
     if (pos < 0){
-        pos = 6 + pos;
+        pos = 4 + pos;
     }
 
     return pos;
@@ -773,12 +808,12 @@ function isPlayerOnMyTeam(player){
     return ((player + playerPosition) % 2 == 0);
 }
 
-function dropTwoCardsHorse(){
+function dropOneCardHorse(){
     currentStage = "dropHorse";
 
-    dropCount = 2;
+    dropCount = 1;
 
-    let htmlString = "<div class='turnMarker'>Select 2 cards to drop</div>";
+    let htmlString = "<div class='turnMarker'>Select 1 card to drop</div>";
     $(".turnMarker").remove();
     $("#player0").append(htmlString);
 }
@@ -879,7 +914,7 @@ function playCard(card){
 
 function getNextPlayerInd(){
     let nextPlayer = playerPosition + 1;
-    if (nextPlayer > 5){
+    if (nextPlayer > 3){
         nextPlayer = 0;
     }
 
@@ -939,7 +974,7 @@ socket.on( 'place card', function( cardInfo ) {
         placeLiveCard(cardInfo.cardPlayed, cardInfo.playerPosition);
     }
 
-    if (dicts.trickInfo.cardsPlayed < 6){
+    if (dicts.trickInfo.cardsPlayed < 4){
         if (isMyTurn(cardInfo.nextPlayer) && skipTurnHorsePepper()){
             let nextPlayer = getNextPlayerInd();
     
@@ -1019,7 +1054,7 @@ socket.on('horse drop', function(bidInfo){
     showCards();
 
     if (highBid.playerInd == playerPosition){
-        dropTwoCardsHorse();
+        dropOneCardHorse();
     }else{
         showDropping(highBid.playerInd);
     }
@@ -1051,8 +1086,8 @@ socket.on('pass horse', function(bidInfo){
 function getPlayerIndBasedOnOffset(offset, bidderInd){
     let pind = bidderInd + offset;
 
-    if (pind > 5){
-        pind = pind - 6;
+    if (pind > 3){
+        pind = pind - 4;
     }
 
     return pind;

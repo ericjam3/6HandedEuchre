@@ -1,0 +1,8 @@
+* Make it so that AI does not huck cards that create singleton Aces
+* trumped in on partner's trick
+* last bidder, don't overbid partner unless it is in a separate suit and is legit better
+* also, last bidder bid minimum unless horse or pepper
+* In general, probably bidding a little too much off the partners
+*** Drop horse high/low
+*** When to horse/pepper
+* smart leads for hitting partners

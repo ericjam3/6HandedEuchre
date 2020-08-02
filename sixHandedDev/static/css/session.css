@@ -51,28 +51,20 @@ body {
 }
 
 #player1 {
-    top: 60%;
+    top: 50%;
     left: 18%;
+    transform: translateY(-50%);
 }
 
 #player2 {
-    top: 30%;
-    left: 18%;
-}
-
-#player3 {
     top: 5%;
     left: 50%;
 }
 
-#player4 {
-    top: 30%;
+#player3 {
+    top: 50%;
     left: 82%;
-}
-
-#player5 {
-    top: 60%;
-    left: 82%;
+    transform: translateY(-50%);
 }
 
 .card {

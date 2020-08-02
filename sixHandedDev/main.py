@@ -162,13 +162,13 @@ def playCard(json):
     dataModel.dicts["trickInfo"]["cardsPlayed"] = dataModel.cardsPlayed
     json["dicts"] = dataModel.dicts
 
-    if dataModel.cardsPlayed > 5:
+    if dataModel.cardsPlayed > 3:
         json["lastCard"] = 1
 
     dataModel.setCurrentPlayer(json["nextPlayer"])
     socketio.emit('place card', json)
 
-    if dataModel.cardsPlayed > 5:
+    if dataModel.cardsPlayed > 3:
         handleEndOfTrick()
     else:
         tryBotPlaying(dataModel.getCurrentPlayer())
@@ -314,7 +314,7 @@ def handleEndOfTrick():
     else:
         dataModel.dicts["handInfo"]["blueTricks"] += 1
 
-    if dataModel.dicts["handInfo"]["tricksPlayed"] == 8:
+    if dataModel.dicts["handInfo"]["tricksPlayed"] == 6:
         beginNewHand()
         return
 
@@ -330,24 +330,19 @@ def startAnotherTrick():
     socketio.emit('new trick', currentHandInfo)
     tryBotPlaying(dataModel.getCurrentPlayer())
 
-def beginNewHand():
-    dataModel.dicts["handInfo"]["handsLeft"] -= 1
-    
+def beginNewHand():    
     calcNewScore()
     dataModel.setNewHandInfo()
 
     socketio.sleep(4)
 
-    if (dataModel.dicts["handInfo"]["handsLeft"] == 0):
-        if dataModel.dicts["handInfo"]["orangeScore"] != dataModel.dicts["handInfo"]["blueScore"]:
-            emailScores()
-            json = {}
-            json["dicts"] = dataModel.dicts
-            socketio.emit('gameover', json)
-            dataModel.resetGame()
-            return
-        else:
-            dataModel.dicts["handInfo"]["handsLeft"] = 1
+    if (isGameOver()):
+        emailScores()
+        json = {}
+        json["dicts"] = dataModel.dicts
+        socketio.emit('gameover', json)
+        dataModel.resetGame()
+        return
 
     dealCards()
 
@@ -373,20 +368,30 @@ def calcNewScore():
     dataModel.dicts["handInfo"][nonBiddingTeam + "Score"] += dataModel.dicts["handInfo"][nonBiddingTeam + "Tricks"]
 
     if dataModel.dicts["handInfo"][biddingTeam + "Tricks"] >= bidNumber:
+        dataModel.wonHand = biddingTeam
         if horse:
-            dataModel.dicts["handInfo"][biddingTeam + "Score"] += 15
+            dataModel.dicts["handInfo"][biddingTeam + "Score"] += 12
         elif pepper:
-            dataModel.dicts["handInfo"][biddingTeam + "Score"] += 30
+            dataModel.dicts["handInfo"][biddingTeam + "Score"] += 24
         else:
             dataModel.dicts["handInfo"][biddingTeam + "Score"] += dataModel.dicts["handInfo"][biddingTeam + "Tricks"]
 
     else:
+        dataModel.wonHand = nonBiddingTeam
         if horse:
-            dataModel.dicts["handInfo"][biddingTeam + "Score"] -= 15
+            dataModel.dicts["handInfo"][biddingTeam + "Score"] -= 12
         elif pepper:
-            dataModel.dicts["handInfo"][biddingTeam + "Score"] -= 30
+            dataModel.dicts["handInfo"][biddingTeam + "Score"] -= 24
         else:
             dataModel.dicts["handInfo"][biddingTeam + "Score"] -= bidNumber
+
+def isGameOver():
+    if dataModel.dicts["handInfo"]["orangeScore"] >= 32 and dataModel.wonHand == "orange":
+        return True
+    elif dataModel.dicts["handInfo"]["blueScore"] >= 32 and dataModel.wonHand == "blue":
+        return True
+    else:
+        return False
 
 def emailScores():
     password = "cottagekeys"
@@ -440,15 +445,12 @@ def submitHorseDropPass(json):
     else:
         dataModel.updateHandAfterHorsePass(json["singlePassedCard"])
 
-    if "done" in json:
-        json["dropper"] = 2
-        json["passedCards"] = []
-    else:
-        json["dropper"] = 4
+    json["dropper"] = 2
+    json["passedCards"] = []
 
     dataModel.passedCards = json["passedCards"]
 
-    if len(json["passedCards"]) == 2:
+    if "done" not in json:
         dataModel.currentStage = "playCards"
         dataModel.setCurrentPlayer(dataModel.dicts["highBid"]["playerInd"])
 

@@ -1,0 +1,417 @@
+body {
+    background-color: rgb(211, 213, 224);
+}
+
+#signinScreen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+}
+
+#waiting {
+    display: none;
+    font-size: xx-large;
+}
+
+#title {
+    font-size: 50px;
+    margin: 40px;
+    font-family: Times;
+}
+
+.titleImage {
+    height: 60px;
+}
+
+#roomNumber {
+    font-size: 28px;
+}
+
+#gametable {
+    display: none;
+}
+
+.player {
+    position: fixed;
+    font-size: x-large;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+#player0 {
+    top: 88%;
+    left: 50%;
+}
+
+#player0 img {
+    max-height: 50px;
+}
+
+#player1 {
+    top: 50%;
+    left: 18%;
+    transform: translate(-50%, -50%);
+}
+
+#player2 {
+    top: 5%;
+    left: 50%;
+}
+
+#player3 {
+    top: 50%;
+    left: 82%;
+    transform: translate(-50%, -50%);
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    height: 75px;
+    width: 50px;
+    margin: 3px;
+    padding-left: 2px;
+    font-size: 24px;
+    font-family: auto;
+    font-weight: bold;
+}
+
+#myCards {
+    position: fixed;
+    display: flex;
+    left: 50%;
+    top: 88%;
+    transform: translate(-50%, -100%);
+}
+
+.flexContainer {
+    display: flex;
+}
+
+.myCard {
+    cursor: pointer;
+    box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.08), 0 1px 0 2px rgba(0, 0, 0, 0.05), 0 1px 0 3px rgba(0, 0, 0, 0.02);
+}
+
+.myCard:hover {
+    transform: translateY(-10px);
+}
+
+.liveCard {
+    margin: 5px 110px 5px 110px;
+    background-color: transparent;
+}
+
+#liveCardLayer1 {
+    margin-bottom: 50px;
+}
+
+#liveCardLayer2 {
+    margin-top: 50px;
+}
+
+.liveCardLayer {
+    display: flex;
+    justify-content: center;
+}
+
+#liveCards {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#bidding {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 5px;
+}
+
+#bidNumber, #bidType {
+    padding: 3px;
+}
+
+#bidNumberButton {
+    width: 90px;
+    transform: translate(0px, 2px);
+}
+
+#bidTypeButton {
+    width: 125px;
+}
+
+.box {
+    position: absolute;
+    display: none;
+    background-color: white;
+    padding: 5px;
+}
+
+#bidType {
+    display: none;
+}
+
+.username {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.username:focus {
+    box-shadow: 0 0 7px rgb(69, 175, 204);
+    outline: none;
+}
+
+.submit, .endGame, .neutral {
+    border-radius: 3px;
+    padding: 7px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.submit:active, .endGame:active, .neutral:active {
+    outline: none;
+}
+
+.submit {
+    border: none;
+    background-color: rgb(109, 159, 230);
+}
+
+.submit:hover:enabled {
+    background-color: rgb(42, 42, 174);
+    color: white;
+}
+
+.endGame {
+    border: none;
+    background-color: rgb(223, 110, 110);
+}
+
+.endGame:hover:enabled {
+    background-color: rgb(135, 0, 0);
+    color: white;
+}
+
+.neutral {
+    border: none;
+    background-color: rgb(72, 196, 66);
+}
+
+.neutral:hover:enabled {
+    background-color: rgb(28, 120, 10);
+    color: white;
+}
+
+#endGameInitial {
+    position: fixed;
+    margin: 0px;
+    top: 4px;
+    left: 4px;
+}
+
+.playerBid {
+    color: black;
+}
+
+/* Scoreboard */
+
+#scoreboard {
+    right: 4px;
+    top: 4px;
+    display: none;
+    font-size: 16px;
+    max-width: 250px;
+}
+
+#scores {
+    display: flex;
+}
+
+#gameInfo {
+    display: flex;
+    font-size: 13px;
+}
+
+.scores {
+    padding: 6px;
+}
+
+.turnMarker, .bidder, .leader {
+    color: black;
+}
+
+.turnMarker {
+    animation:blinkingText 2.5s infinite;
+}
+
+@keyframes blinkingText{
+    0%{     opacity: 0%;      }
+    20%{    opacity: 70%;     }
+    35%{    opacity: 100%;     }
+    65%{    opacity: 90%;     }
+    80%{    opacity: 20%;     }
+    100%{   opacity: 10%;    }
+}
+
+#orangeScoreboard {
+    background-color: #fda03d;
+    flex-grow: 1;
+}
+
+#blueScoreboard {
+    background-color: rgb(109, 159, 230);
+    flex-grow: 1;
+}
+
+.suitImage {
+    height: 24px;
+    transform: translate(0px, -3px);
+}
+
+.card .suitImage {
+    transform: translate(0px, -10px);
+    height: 22px;
+}
+
+#bid .suitImage {
+    height: 18px;
+}
+
+#gameover {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: xx-large;
+    font-weight: bold;
+    display: none;
+}
+
+.birthdayImage {
+    height: 200px;
+    left: 50%;
+    top: 50%;
+    position: fixed;
+    transform: translate(-50%, -60%);
+    z-index: -1;
+    opacity: 80%;
+}
+
+img {
+    max-height: 80px;
+}
+
+#scoreboard img {
+    max-height: 28px;
+}
+
+#roomLink {
+    font-size: 20px;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    text-align: center;
+    background-color: white;
+    padding: 15px;
+}
+
+#roomLink div {
+    margin: 3px;
+}
+
+#otherRooms {
+    font-weight: bolder;
+}
+
+#endGameDiv {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    z-index: 5;
+    width: 400px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+
+    text-align: center;
+    font-size: 18px;
+    padding: 15px;
+}
+
+.playersLoggedIn {
+    font-size: 30px;
+}
+
+#orangePlayersLoggedIn {
+    float: left;
+}
+
+#bluePlayersLoggedIn {
+    float: right;
+}
+
+.orangePlayer {
+    color: #f28a1b;
+}
+
+.bluePlayer {
+    color: #174887;
+}
+
+#clearPlayersButtonContainer {
+    display: none;
+}
+
+#clearPlayersButtonContainer:hover {
+    background-color: rgb(135, 0, 0);
+    color: white;
+}
+
+#roomFullDiv {
+    display: none;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+#botForm {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 10px;
+}
+
+#botForm input {
+    margin: 5px;
+}
+
+.suitDropdown {
+    height: 16px;
+    width: 14px;
+    transform: translate(0px, -2px);
+}
+
+._shadow {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+}
+
+._smallShadow {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+}
+
+._rounded {
+    border-radius: .25rem!important;
+}
