@@ -532,10 +532,10 @@ class AI:
             return self.startTrickSuit(self.bid["type"])
 
     def startTrickHighLow(self, bestRank, secondRank):
-        if self.skillLevel == "cerebral":
-            bestLead = self.trollerDogHighLow(bestRank, secondRank)
-            if bestLead is not None:
-                return bestLead
+        # if self.skillLevel == "cerebral":
+        #     bestLead = self.trollerDogHighLow(bestRank, secondRank)
+        #     if bestLead is not None:
+        #         return bestLead
 
         bestLead = self.checkAcesNines(bestRank)
         if bestLead is not None:
@@ -620,10 +620,12 @@ class AI:
         return None
 
     def startTrickSuit(self, trump):
-        if self.skillLevel == "cerebral":
-            bestLead = self.trollerDogSuit()
-            if bestLead is not None:
-                return bestLead
+        # if self.skillLevel == "cerebral":
+        #     bestLead = self.trollerDogSuit()
+        #     if bestLead is not None:
+        #         return bestLead
+
+        bestLead = None
 
         if self.skillLevel != "cerebral" or self.otherTeamHasSuit(trump):
             bestLead = self.checkForBestTrump(trump)
